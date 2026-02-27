@@ -1,0 +1,33 @@
+File structure:
+Project_Root/
+├─ code/
+│  ├─ data/
+│  │  ├─ bronze/
+│  │  │  └─ Contains raw data files that are not JSON
+│  │  ├─ bronze/
+│  │  │  └─ Contains raw JSON files
+│  │  ├─ bronze/
+│  │     └─ TBD ???
+│  ├─ notebooks/
+│  │  └─jupyter notebooks for getting/cleaning data
+│  ├─ scripts/
+│  │  └─ python scripts for getting/cleaning data
+│  ├─ sql/
+│  │     └─sql scripts for postgresSQL database
+│  ├─ src/
+│  └─ website/
+│     └─ All files for creating web application (including Flask & React scripts)
+│ 
+│ 
+├─ planning
+│  ├─ file directory: how files are organized within project directory
+│  ├─ data sources: where data is from & how it's accessed
+│  └─ project flow: which tools are being used & why
+│
+├─ demo
+├─ presentation
+├─ reports
+├─ research_paper
+├─ venv
+├─ requirements.txt
+└─ README.md

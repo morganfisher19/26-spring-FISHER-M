@@ -1,0 +1,41 @@
+Project Flow Overview
+
+Goal:
+Create a professional, end-to-end interactive web application that provides users with quick access to congressional voting history and visually appealing, interactive insights into voting patterns.
+
+
+1. Data Extraction:
+Data is collected using web scraping and APIs in Python. 
+    WHY: direct access to government data sources, accesses for most up-to-date data.
+
+
+2. Data Cleaning (Medallion Architecture):
+The cleaning process follows a three-tier medallion architecture:
+    WHY: traceability, reproducibility, and emphasis on data quality
+
+- Bronze Layer: Raw XML and CSV files w/p modification
+    WHY: Raw files preserve original data integrity.
+- Silver Layer: Data is converted to JSON
+    WHY: JSON is ideal for flexibility, hierarchical structure, ability to debug, & efficiency in its applications
+- Gold Layer: Fully cleaned and validated JSON files
+    WHY: ready for analysis and querying.
+
+
+3. Data Querying:
+Clean data is loaded into a PostgreSQL database. 
+    WHY: fast structured queries, efficient retrieval within web app through proper indexing
+
+
+4. Web App Backend:
+Python Flask is used for the backend serving processed data to the frontend in JSON format
+    WHY: lightweight and flexible API endpoints, fast interactions, and dynamic content
+
+
+5. Web App Frontend:
+React.js is used for the frontend, supplemented with HTML and CSS elements for styling
+    WHY: React allows for reusable UI elements, including dynamic tables and interactive charts - good for quick response time
+
+
+6. Data Visualizations:
+D3.js is used to create interactive charts
+    WHY: visually appealing and customizable. Integration with React ensures efficiency & interactivity
