@@ -1,0 +1,26 @@
+List of to-do's:
+
+Phase: Phase I
+
+Database:
+1. Add in variables on voting data: question, etc.
+2. Change bill_id and amendment_id to legislation_id
+3. Create new table called 'vote_party_totals' with vote_id as PK with the following schema:
+CREATE TABLE vote_party_totals (
+    vote_id VARCHAR(15) REFERENCES votes(vote_id),
+    party CHAR(1),
+    yes_count INT,
+    no_count INT,
+    present_count INT,
+    not_voting_count INT,
+    PRIMARY KEY (vote_id, party)
+);
+
+
+Backend:
+
+
+
+Frontend:
+- Implement react w/ other frontend code
+- Work on styling to make

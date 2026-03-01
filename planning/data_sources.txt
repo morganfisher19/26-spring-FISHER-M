@@ -50,3 +50,6 @@ Bill data
         Website: https://api.congress.gov/
         API Search: https://api.congress.gov/v3/amendment/119?format=json&offset=0&api_key=Y1rHJZnyeQR8VTyevR7cFJt0bjjzZn5nCDcvhj8f
         ^ with around 5000 data points for 119th congress
+
+State reference data:
+https://github.com/jasonong/List-of-US-States/blob/master/states.csv
