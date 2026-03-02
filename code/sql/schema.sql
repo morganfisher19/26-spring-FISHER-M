@@ -63,3 +63,16 @@ CREATE TABLE vote_records (
     FOREIGN KEY (member_id) REFERENCES members(member_id)
 
 );
+
+CREATE TABLE vote_party_totals (
+    vote_id VARCHAR(17),
+    party CHAR(1),
+    yes_count INT,
+    no_count INT,
+    present_count INT,
+    not_voting_count INT,
+
+    PRIMARY KEY (vote_id, party),
+
+    FOREIGN KEY (vote_id) REFERENCES votes(vote_id),
+);
