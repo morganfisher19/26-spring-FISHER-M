@@ -38,8 +38,9 @@ CREATE TABLE amendments (
 
 
 CREATE TABLE votes (
-    vote_id VARCHAR(15) PRIMARY KEY,
+    vote_id VARCHAR(17) PRIMARY KEY,
     bill_id TEXT,
+    question TEXT,
     chamber CHAR(1),
     congress INT,
     session_num INT,
@@ -52,7 +53,7 @@ CREATE TABLE votes (
 
 
 CREATE TABLE vote_records (
-    vote_id VARCHAR(15),
+    vote_id VARCHAR(17),
     member_id VARCHAR(8),
     position TEXT,
 

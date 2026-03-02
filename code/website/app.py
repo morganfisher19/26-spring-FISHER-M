@@ -61,7 +61,7 @@ class BillModel(db.Model):
 
 class VoteModel(db.Model):
     __tablename__ = 'votes'
-    vote_id=db.Column(db.String(15), primary_key=True)
+    vote_id=db.Column(db.String(17), primary_key=True)
     bill_id=db.Column(db.Text, db.ForeignKey('bills.bill_id'))
     chamber=db.Column(db.String(1))
     congress=db.Column(db.Integer)
@@ -82,7 +82,7 @@ class VoteModel(db.Model):
 
 class VoteRecordModel(db.Model):
     __tablename__ = 'vote_records'
-    vote_id = db.Column(db.String(15), db.ForeignKey('votes.vote_id'), primary_key=True)
+    vote_id = db.Column(db.String(17), db.ForeignKey('votes.vote_id'), primary_key=True)
     member_id = db.Column(db.String(8), db.ForeignKey('members.member_id'), primary_key=True)
     position = db.Column(db.Text)
     # created_at=db.Column(db.DateTime(timezone=True))
