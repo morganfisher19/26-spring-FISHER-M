@@ -3,18 +3,7 @@ List of to-do's:
 Phase: Phase 1
 
 Database:
-1. Create new table called 'vote_party_totals' with vote_id as PK with the following schema:
-CREATE TABLE vote_party_totals (
-    vote_id VARCHAR(17) REFERENCES votes(vote_id),
-    party CHAR(1),
-    yes_count INT,
-    no_count INT,
-    present_count INT,
-    not_voting_count INT,
-    PRIMARY KEY (vote_id, party)
-);
-2. Change bill_id and amendment_id to legislation_id
-3. Alter database to include new data
+1. Alter database to include new data
 
 
 Backend:

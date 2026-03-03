@@ -16,21 +16,44 @@ CREATE TABLE members (
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE legislation (
+    legislation_id TEXT PRIMARY KEY,
+    legislation_type TEXT NOT NULL, -- 'bill', 'amendment'
+    congress INT,
+    chamber CHAR(1),
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE bills (
-    bill_id TEXT PRIMARY KEY,
+    legislation_id TEXT PRIMARY KEY,
     bill_type TEXT,
     bill_num INT,
     congress INT,
     chamber CHAR(1),
     title TEXT,
-    policy_area TEXT,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+
+    FOREIGN KEY (legislation_id) REFERENCES legislation(legislation_id) ON DELETE CASCADE
+);
+
+
+CREATE TABLE amendments (
+    legislation_id TEXT PRIMARY KEY,
+    amendment_type TEXT,
+    congress INT,
+    chamber CHAR(1),
+    purpose TEXT,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+
+    FOREIGN KEY (legislation_id) REFERENCES legislation(legislation_id) ON DELETE CASCADE
+
 );
 
 
 CREATE TABLE votes (
     vote_id VARCHAR(17) PRIMARY KEY,
-    bill_id TEXT,
+    legislation_id TEXT,
+    legislation_type TEXT,
     question TEXT,
     chamber CHAR(1),
     congress INT,
@@ -39,7 +62,7 @@ CREATE TABLE votes (
     result TEXT,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
 
-    FOREIGN KEY (bill_id) REFERENCES bills(bill_id)
+    FOREIGN KEY (legislation_id) REFERENCES legislation(legislation_id)
 );
 
 
