@@ -71,6 +71,7 @@ CREATE TABLE vote_party_totals (
     no_count INT,
     present_count INT,
     not_voting_count INT,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
 
     PRIMARY KEY (vote_id, party),
 
