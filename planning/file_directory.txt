@@ -4,10 +4,29 @@ Project_Root/
 │  ├─ data/
 │  │  ├─ bronze/
 │  │  │  └─ Contains raw data files that are not JSON
-│  │  ├─ bronze/
+│  │  ├─ silver/
 │  │  │  └─ Contains raw JSON files
-│  │  ├─ bronze/
-│  │     └─ TBD ???
+│  │  ├─ gold/
+│  │     └─ Contains clean data
+
+Pipeline:
+
+run_pipeline.py          # entry point — runs all steps
+config.py                # constants, API keys, paths
+pipeline/
+  extract/
+    congress_api.py      # bills, members, amendments, house rollcall
+    house_votes.py       # house XML scraper
+    senate_votes.py      # senate XML scraper
+  transform/
+    clean_members.py
+    clean_bills.py
+    clean_votes.py
+    clean_vote_records.py
+  utils/
+    cache.py             # cache logic
+    api_client.py        # rate-limited session
+
 │  ├─ notebooks/
 │  │  └─jupyter notebooks for getting/cleaning data
 │  ├─ scripts/
