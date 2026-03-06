@@ -68,3 +68,14 @@ CREATE TABLE vote_party_totals (
 
     FOREIGN KEY (vote_id) REFERENCES votes(vote_id),
 );
+
+CREATE TABLE bill_sponsorships (
+    bill_id TEXT,
+    member_id VARCHAR(8),
+    sponsor_type CHAR(1),  -- 'S' = sponsor, 'C' = cosponsor
+
+    PRIMARY KEY (bill_id, member_id, role),
+
+    FOREIGN KEY (bill_id) REFERENCES bills(bill_id),
+    FOREIGN KEY (member_id) REFERENCES members(member_id)
+);
