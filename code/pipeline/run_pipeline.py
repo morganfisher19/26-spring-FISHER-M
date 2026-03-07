@@ -20,20 +20,22 @@ from pipeline.extract.congress_api import (
     fetch_bills,
     fetch_bill_policy_area_and_sponsorship
 )
-from pipeline.extract.house_votes import fetch_house_votes
-from pipeline.extract.senate_votes import fetch_senate_votes
+from pipeline.extract.congress_xml import (
+    fetch_senate_rollcall,
+    fetch_all_member_votes
+)
+from pipeline.extract.congress_build import (
+    fetch_senate_party_totals
+)
 
-'''
-Working calls:
 fetch_house_rollcall()
 fetch_house_party_totals()
 fetch_members()
 fetch_bills()
-
-'''
 fetch_bill_policy_area_and_sponsorship()
-# fetch_house_votes()
-# fetch_senate_votes()
+fetch_senate_rollcall()
+fetch_all_member_votes()
+fetch_senate_party_totals()
 
 # --- Transform ---
 # from pipeline.transform.clean_members import clean_members

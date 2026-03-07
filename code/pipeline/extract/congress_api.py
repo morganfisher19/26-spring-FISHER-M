@@ -1,3 +1,16 @@
+'''
+congress_api.py gathers data from the congress.gov API
+
+data extracted:
+- members
+- bills
+- house rollcall
+- house vote party totals
+- bill policy area
+- bill sponsorship
+
+'''
+
 import requests
 import random
 import json
@@ -9,6 +22,7 @@ import os
 from dotenv import load_dotenv
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from config import API_KEY, SILVER_DIR, CACHE_DIR, CONGRESS as congress
+from utils.helpers import save_to_file
 
 base_url = "https://api.congress.gov/v3"
 
@@ -34,14 +48,6 @@ def get_api_info(search_string, max_retries=5):
         else:
             response.raise_for_status()
     raise Exception(f"Failed after {max_retries} retries: {url}")
-
-# Function for saving data as json
-def save_to_file(data, file_path):
-    file_path = Path(file_path)
-    file_path.parent.mkdir(parents=True, exist_ok=True)
-
-    with open(file_path, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=4)
 
 def fetch_members():
     print("Fetching members!")
@@ -182,7 +188,6 @@ def fetch_house_party_totals():
     save_to_file(final_payload, output_file)
     print("Fetch complete!")
 
-
 def fetch_bill_policy_area_and_sponsorship():
     print("Fetching bill policy area and sponsorship!")
     CACHE_PATH = CACHE_DIR / "bill_cache_119.json"
@@ -264,21 +269,35 @@ def fetch_bill_policy_area_and_sponsorship():
             raise
 
     # 4. Build output files from cache
-    sponsorships_output = {"congress": congress, "bills": []}
-    policy_area_output = {"congress": congress, "bills": []}
+    sponsorships_bills = []
+    policy_area_bills = []
 
     for bill in bill_cache.values():
 
-        sponsorships_output["bills"].append({
+        sponsorships_bills.append({
             "bill_id": bill["bill_id"],
             "sponsor_ids": bill["sponsor_ids"],
             "cosponsor_ids": bill["cosponsor_ids"]
         })
 
-        policy_area_output["bills"].append({
+        policy_area_bills.append({
             "bill_id": bill["bill_id"],
             "policy_area": bill["policy_area"]
         })
+
+    sponsorships_output = {
+        "source": "https://api.congress.gov/",
+        "retrieved_at": retrieved_at,
+        "congress": congress,
+        "bills": sponsorships_bills
+    }
+
+    policy_area_output = {
+        "source": "https://api.congress.gov/",
+        "retrieved_at": retrieved_at,
+        "congress": congress,
+        "bills": policy_area_bills
+    }
 
     save_to_file(sponsorships_output, f"{output_path}/bills_sponsorships_119.json")
     save_to_file(policy_area_output, f"{output_path}/bills_policy_area_119.json")
