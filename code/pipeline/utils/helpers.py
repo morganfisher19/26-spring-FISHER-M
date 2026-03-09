@@ -20,13 +20,13 @@ def save_to_file(data, file_path):
 
 # Importing raw files from silver
 def import_silver(file_name):
-    with open(SILVER_DIR / file_name, "r") as f:
+    with open(SILVER_DIR / file_name, "r", encoding="utf-8") as f:
         raw_data = json.load(f)
     return raw_data
 
 # Exporting clean files to gold
 def export_gold(file_name, clean_data, indent_num):
-    with open(GOLD_DIR / file_name, "w") as f:
+    with open(GOLD_DIR / file_name, "w", encoding="utf-8") as f:
         json.dump(clean_data, f, indent=indent_num, ensure_ascii=False)
     print(f"Output saved to data/gold/{file_name}")
 
