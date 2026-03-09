@@ -28,23 +28,29 @@ from pipeline.extract.congress_build import (
     fetch_senate_party_totals
 )
 
-fetch_house_rollcall()
-fetch_house_party_totals()
-fetch_members()
-fetch_bills()
-fetch_bill_policy_area_and_sponsorship()
-fetch_senate_rollcall()
-fetch_all_member_votes()
-fetch_senate_party_totals()
+# fetch_house_rollcall()
+# fetch_house_party_totals()
+# fetch_members()
+# fetch_bills()
+# fetch_bill_policy_area_and_sponsorship()
+# fetch_senate_rollcall()
+# fetch_all_member_votes()
+# fetch_senate_party_totals()
 
 # --- Transform ---
-# from pipeline.transform.clean_members import clean_members
+from pipeline.transform.clean_members import clean_members
 # from pipeline.transform.clean_bills import clean_bills
 # from pipeline.transform.clean_votes import clean_votes
 # from pipeline.transform.clean_vote_records import clean_vote_records
 # from pipeline.transform.clean_vote_party_totals import clean_vote_party_totals
 # from pipeline.transform.clean_bill_sponsorships import clean_bill_sponsorships
 
+clean_members()
+# clean_bills()
+# clean_votes()
+# clean_vote_records()
+# clean_vote_party_totals()
+# clean_bill_sponsorships()
 
 '''
 # --- Load ---
