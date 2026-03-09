@@ -1,3 +1,0 @@
-https://api.congress.gov/v3/bill?format=xml&api_key=Y1rHJZnyeQR8VTyevR7cFJt0bjjzZn5nCDcvhj8f
-
-Ctrl+shift+P --> Rest Client: Send Request
