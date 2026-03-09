@@ -9,7 +9,7 @@ CREATE TABLE members (
     last_name TEXT,
     party CHAR(1),
     chamber CHAR(1),
-    state_name TEXT,
+    state_name CHAR(2),
     district INT, 
     years_in_congress INT,
     age INT,
@@ -17,7 +17,7 @@ CREATE TABLE members (
 );
 
 CREATE TABLE bills (
-    bill_id TEXT PRIMARY KEY,
+    bill_id VARCHAR(20) PRIMARY KEY,
     bill_type TEXT,
     bill_num INT,
     congress INT,
@@ -29,8 +29,8 @@ CREATE TABLE bills (
 
 
 CREATE TABLE votes (
-    vote_id VARCHAR(17) PRIMARY KEY,
-    bill_id TEXT,
+    vote_id VARCHAR(20) PRIMARY KEY,
+    bill_id VARCHAR(20),
     question TEXT,
     chamber CHAR(1),
     congress INT,
@@ -44,9 +44,10 @@ CREATE TABLE votes (
 
 
 CREATE TABLE vote_records (
-    vote_id VARCHAR(17),
+    vote_id VARCHAR(20),
     member_id VARCHAR(8),
     position TEXT,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
 
     PRIMARY KEY (vote_id, member_id),
 
@@ -56,7 +57,7 @@ CREATE TABLE vote_records (
 );
 
 CREATE TABLE vote_party_totals (
-    vote_id VARCHAR(17),
+    vote_id VARCHAR(20),
     party CHAR(1),
     yes_count INT,
     no_count INT,
@@ -66,15 +67,16 @@ CREATE TABLE vote_party_totals (
 
     PRIMARY KEY (vote_id, party),
 
-    FOREIGN KEY (vote_id) REFERENCES votes(vote_id),
+    FOREIGN KEY (vote_id) REFERENCES votes(vote_id)
 );
 
 CREATE TABLE bill_sponsorships (
-    bill_id TEXT,
+    bill_id VARCHAR(20),
     member_id VARCHAR(8),
     sponsor_type CHAR(1),  -- 'S' = sponsor, 'C' = cosponsor
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
 
-    PRIMARY KEY (bill_id, member_id, role),
+    PRIMARY KEY (bill_id, member_id, sponsor_type),
 
     FOREIGN KEY (bill_id) REFERENCES bills(bill_id),
     FOREIGN KEY (member_id) REFERENCES members(member_id)

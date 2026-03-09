@@ -45,7 +45,7 @@ def clean_bills():
             cleaned_bills.append({
                 "bill_id": bill_id,
                 "bill_type": bill_type,
-                "bill_number": number,
+                "bill_num": number,
                 "congress": congress,
                 "chamber": chamber,
                 "title": title,
@@ -56,7 +56,7 @@ def clean_bills():
     TYPE_MAP_BILLS = {
         "bill_id": str,
         "bill_type": str,
-        "bill_number": int,
+        "bill_num": int,
         "congress": int,
         "chamber": str,
         "title": str,

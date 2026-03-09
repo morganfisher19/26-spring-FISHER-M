@@ -52,7 +52,8 @@ clean_vote_records()
 clean_vote_party_totals()
 clean_bill_sponsorships()
 
-'''
+
 # --- Load ---
-(To be included later)
-'''
+from pipeline.load.update_db import update_db
+
+update_db()

@@ -8,7 +8,7 @@ To connect to db:
     \c congress_db
 
 To run script from a file:
-    \i 'c:/Users/morga/26-spring-FISHER-M/code/sql/FILE_NAME'
+    \i 'c:/Users/morga/26-spring-FISHER-M/code/sql/schema.sql'
 
 List tables:
     \d
