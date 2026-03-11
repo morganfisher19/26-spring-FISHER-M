@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 import os
+from flask_cors import CORS
 
 # Connect to frontend
 
@@ -8,6 +9,8 @@ DB_PASSWORD = os.getenv("DB_PASSWORD")
 
 # Creates web server
 app = Flask(__name__)
+
+CORS(app)
 
 # Connect to the database
 app.config['SQLALCHEMY_DATABASE_URI']=f'postgresql://postgres:{DB_PASSWORD}@localhost/congress_db'
@@ -106,25 +109,33 @@ class BillSponsorshipModel(db.Model):
     sponsor_type = db.Column(db.String(1), primary_key=True)
     created_at=db.Column(db.DateTime(timezone=True))
 
-# Create routes
-@app.route('/api/')
-def index():
+# To check API is working:
+@app.route('/api/health')
+def health():
+    return {'status': 'ok'}
 
-    # Get all members to populate dropdown
-    members = db.session.query(MemberModel.member_id, MemberModel.full_name).order_by(MemberModel.full_name).all()
+# Get member data for home page member search
+@app.route('/api/members')
+def get_members():
+    members = MemberModel.query.order_by(MemberModel.full_name).all()
+    return jsonify([{
+        'member_id': m.member_id,
+        'full_name': m.full_name
+    } for m in members])
 
-    return render_template("index.html", members=members)
 
-
-# Query members
-@app.route('/api/member')
-def get_member():
-    full_name = request.args.get("full_name")
-
-    member = MemberModel.query.filter_by(full_name=full_name).first()
-    voteRecords=member.vote_records
-
-    return render_template("member.html", member=member, voteRecords=voteRecords)
+# Get individual member data for individual member pages
+@app.route('/api/member/<string:member_id>')
+def get_member(member_id):
+    m = MemberModel.query.filter_by(member_id=member_id).first_or_404()
+    return jsonify({
+        'member_id': m.member_id,
+        'full_name': m.full_name,
+        'party': m.party,
+        'chamber': m.chamber,
+        'state_name': m.state_name,
+        'vote_records': [{'vote_id': vr.vote_id, 'position': vr.position} for vr in m.vote_records]
+    })
 
 
 
