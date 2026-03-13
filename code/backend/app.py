@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 import os
 from flask_cors import CORS
+from sqlalchemy.orm import joinedload
 
 # Connect to frontend
 
@@ -127,14 +128,36 @@ def get_members():
 # Get individual member data for individual member pages
 @app.route('/api/member/<string:member_id>')
 def get_member(member_id):
-    m = MemberModel.query.filter_by(member_id=member_id).first_or_404()
+    # m = (
+    #     MemberModel.query
+    #     .options(
+    #         joinedload(MemberModel.vote_records)
+    #         .joinedload(VoteRecordModel.vote)
+    #         .joinedload(VoteModel.bill)
+    #     )
+    #     .filter_by(member_id=member_id)
+    #     .first_or_404()
+    # )
+    m = MemberModel.query.filter_by(member_id=member_id).first()
+
+    vote_data = []
+    for vr in m.vote_records:
+        vote = vr.vote  # backref from VoteRecordModel -> VoteModel
+        bill_title = vote.bill.title if vote.bill else None  # backref from VoteModel -> BillModel
+        vote_data.append({
+            'vote_id': vr.vote_id,
+            'vote_date': vote.vote_date.isoformat() if vote.vote_date else None,
+            'bill_title': bill_title,
+            'position': vr.position,
+        })
+
     return jsonify({
         'member_id': m.member_id,
         'full_name': m.full_name,
         'party': m.party,
         'chamber': m.chamber,
         'state_name': m.state_name,
-        'vote_records': [{'vote_id': vr.vote_id, 'position': vr.position} for vr in m.vote_records]
+        'vote_records': vote_data
     })
 
 

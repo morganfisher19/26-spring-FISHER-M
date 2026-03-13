@@ -1,7 +1,8 @@
-import Message from './Message';
+import MemberVotes from "./components/MemberVotes";
+
 
 function App() {
-  return <div><Message></Message></div>;
+  return <MemberVotes />;
 }
 
 export default App;
