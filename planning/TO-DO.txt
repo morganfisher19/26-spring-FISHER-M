@@ -1,15 +1,35 @@
-List of to-do's:
+Mapping out rest of the project:
 
-Phase: Phase 1
+TO-DO:
 
-Database:
-1. Alter database to include new data
+Phase 1: Member data pages
+    * Clean up voting tables to include important votes
+    * Add an issue area filter
+    * Create separate tabs where users can look at their sponsored bills & cosponsored bills
+    * Include section in sponsored bills that includes bills that have passed
 
+Phase 2: Website Organization
+    * Create dashboard page & about page
+    * Create Nav Bar at top for homepage access, dashboard page(s) & about page
 
-Backend:
+Phase 3: Congressional Insights Analytics
+    * Explore data to find insights
+    * Create simple visualizations
+    * Update visualizations for website impletmentation
+    * Complete dashboard page with visualizations
 
+Phase 4: Styling
+    * Create neat layout
+    * Implement cherry blossom theme
+
+Phase 5: Hosting
+    * Find a medium to host website & database
+    * host!
 
 
 Frontend:
 - Implement react w/ other frontend code
 - Work on styling to make
+
+
+DONE:

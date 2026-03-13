@@ -1,19 +1,17 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 interface Member {
   member_id: string;
   full_name: string;
 }
 
-interface MemberSelectProps {
-  onSelect?: (memberId: string) => void;
-}
-
-export default function MemberSelect({ onSelect }: MemberSelectProps) {
+export default function MemberSelect() {
   const [members, setMembers] = useState<Member[]>([]);
-  const [selected, setSelected] = useState<string>("");
+  const [selectedId, setSelectedId] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetch("http://localhost:5000/api/members")
@@ -31,23 +29,27 @@ export default function MemberSelect({ onSelect }: MemberSelectProps) {
       });
   }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const val = e.target.value;
-    setSelected(val);
-    onSelect?.(val);
+  const handleNavigate = () => {
+    if (selectedId) navigate(`/member/${selectedId}`);
   };
 
   if (loading) return <p>Loading members...</p>;
   if (error) return <p>Error: {error}</p>;
 
   return (
-    <select value={selected} onChange={handleChange}>
-      <option value="">-- Select a Member --</option>
-      {members.map((m) => (
-        <option key={m.member_id} value={m.member_id}>
-          {m.full_name}
-        </option>
-      ))}
-    </select>
+    <div>
+      <select value={selectedId} onChange={(e) => setSelectedId(e.target.value)}>
+        <option value="">-- Select a Member --</option>
+        {members.map((m) => (
+          <option key={m.member_id} value={m.member_id}>
+            {m.full_name}
+          </option>
+        ))}
+      </select>
+
+      <button onClick={handleNavigate} disabled={!selectedId}>
+        Get Member Info
+      </button>
+    </div>
   );
 }

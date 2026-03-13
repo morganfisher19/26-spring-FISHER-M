@@ -44,11 +44,11 @@ def correct_senate_bioguide_id():
             else:
                 vote["member_id"] = None  # unmatched case
 
-        with open(SILVER_DIR / votes_path, "w", encoding="utf-8") as f:
+        with open(votes_path, "w", encoding="utf-8") as f:
             json.dump(vote_data, f, indent=2)
 
-    attach_bioguide_ids("senate_votes_119_1.json", member_lookup)
-    attach_bioguide_ids("senate_votes_119_2.json", member_lookup)
+    attach_bioguide_ids(SILVER_DIR / "senate_votes_119_1.json", member_lookup)
+    attach_bioguide_ids(SILVER_DIR / "senate_votes_119_2.json", member_lookup)
 
 
 def clean_vote_records():

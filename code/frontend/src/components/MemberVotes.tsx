@@ -1,9 +1,6 @@
 import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 
-interface Member {
-  member_id: string;
-  full_name: string;
-}
 
 interface VoteRecord {
   vote_id: string;
@@ -24,58 +21,36 @@ interface MemberDetail {
 const API_BASE = "http://localhost:5000";
 
 export default function MemberVotes() {
-  const [members, setMembers] = useState<Member[]>([]);
-  const [selectedId, setSelectedId] = useState<string>("");
+  const { memberId } = useParams<{ memberId: string }>();
+  const navigate = useNavigate();
   const [memberDetail, setMemberDetail] = useState<MemberDetail | null>(null);
-  const [loadingMembers, setLoadingMembers] = useState<boolean>(true);
-  const [loadingDetail, setLoadingDetail] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-
-  // Fetch member list on mount
-  useEffect(() => {
-    fetch(`${API_BASE}/api/members`)
-      .then((res) => {
-        if (!res.ok) throw new Error(`HTTP error: ${res.status}`);
-        return res.json();
-      })
-      .then((data: Member[]) => {
-        setMembers(data);
-        setLoadingMembers(false);
-      })
-      .catch((err) => {
-        setError(err.message);
-        setLoadingMembers(false);
-      });
-  }, []);
 
   // Fetch member detail when selection changes
   useEffect(() => {
-    if (!selectedId) {
-      setMemberDetail(null);
-      return;
-    }
+    if (!memberId) return;
 
-    setLoadingDetail(true);
+    setLoading(true);
     setError(null);
 
-    fetch(`${API_BASE}/api/member/${selectedId}`)
+    fetch(`${API_BASE}/api/member/${memberId}`)
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP error: ${res.status}`);
         return res.json();
       })
       .then((data: MemberDetail) => {
-        // Sort vote records most recent first
         data.vote_records.sort(
           (a, b) => new Date(b.vote_date).getTime() - new Date(a.vote_date).getTime()
         );
         setMemberDetail(data);
-        setLoadingDetail(false);
+        setLoading(false);
       })
       .catch((err) => {
         setError(err.message);
-        setLoadingDetail(false);
+        setLoading(false);
       });
-  }, [selectedId]);
+  }, [memberId]);
 
   const formatDate = (isoString: string) =>
     new Date(isoString).toLocaleDateString("en-US", {
@@ -84,57 +59,41 @@ export default function MemberVotes() {
       day: "numeric",
     });
 
+  if (loading) return <p>Loading member profile...</p>;
+  if (error) return <p>Error: {error}</p>;
+  if (!memberDetail) return <p>No member data found.</p>;
+
   return (
     <div>
-      {/* Member Select */}
-      {loadingMembers ? (
-        <p>Loading members...</p>
+      <button onClick={() => navigate(-1)}>← Back</button>
+
+      <h2>{memberDetail.full_name}</h2>
+      <p>
+        {memberDetail.party} · {memberDetail.chamber === "H" ? "House" : "Senate"} ·{" "}
+        {memberDetail.state_name}
+      </p>
+
+      {memberDetail.vote_records.length === 0 ? (
+        <p>No vote records found.</p>
       ) : (
-        <select value={selectedId} onChange={(e) => setSelectedId(e.target.value)}>
-          <option value="">-- Select a Member --</option>
-          {members.map((m) => (
-            <option key={m.member_id} value={m.member_id}>
-              {m.full_name}
-            </option>
-          ))}
-        </select>
-      )}
-
-      {error && <p style={{ color: "red" }}>Error: {error}</p>}
-
-      {/* Vote Records */}
-      {loadingDetail && <p>Loading votes...</p>}
-
-      {memberDetail && !loadingDetail && (
-        <div>
-          <h2>{memberDetail.full_name}</h2>
-          <p>
-            {memberDetail.party} · {memberDetail.chamber === "H" ? "House" : "Senate"} · {memberDetail.state_name}
-          </p>
-
-          {memberDetail.vote_records.length === 0 ? (
-            <p>No vote records found.</p>
-          ) : (
-            <table>
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Bill Title</th>
-                  <th>Position</th>
-                </tr>
-              </thead>
-              <tbody>
-                {memberDetail.vote_records.map((vr) => (
-                  <tr key={vr.vote_id}>
-                    <td>{formatDate(vr.vote_date)}</td>
-                    <td>{vr.bill_title}</td>
-                    <td>{vr.position}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Bill Title</th>
+              <th>Position</th>
+            </tr>
+          </thead>
+          <tbody>
+            {memberDetail.vote_records.map((vr) => (
+              <tr key={vr.vote_id}>
+                <td>{formatDate(vr.vote_date)}</td>
+                <td>{vr.bill_title}</td>
+                <td>{vr.position}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       )}
     </div>
   );

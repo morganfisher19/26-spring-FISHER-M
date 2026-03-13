@@ -2,7 +2,8 @@ from flask import Flask, render_template, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 import os
 from flask_cors import CORS
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import joinedload, contains_eager
+from sqlalchemy import or_, and_, not_
 
 # Connect to frontend
 
@@ -110,6 +111,7 @@ class BillSponsorshipModel(db.Model):
     sponsor_type = db.Column(db.String(1), primary_key=True)
     created_at=db.Column(db.DateTime(timezone=True))
 
+
 # To check API is working:
 @app.route('/api/health')
 def health():
@@ -124,30 +126,60 @@ def get_members():
         'full_name': m.full_name
     } for m in members])
 
+# Keywords for filtering member votes
+PASSAGE_KEYWORDS = [
+    "Passage", "Pass", "Agreeing to the Resolution",
+    "Joint Resolution", "Concurrent Resolution",
+    "Concur in the Senate Amendment"
+]
 
 # Get individual member data for individual member pages
 @app.route('/api/member/<string:member_id>')
 def get_member(member_id):
-    # m = (
-    #     MemberModel.query
-    #     .options(
-    #         joinedload(MemberModel.vote_records)
-    #         .joinedload(VoteRecordModel.vote)
-    #         .joinedload(VoteModel.bill)
-    #     )
-    #     .filter_by(member_id=member_id)
-    #     .first_or_404()
-    # )
-    m = MemberModel.query.filter_by(member_id=member_id).first()
+    keyword_filters = or_(
+        *[VoteModel.question.ilike(f'%{kw}%') for kw in PASSAGE_KEYWORDS]
+    )
+
+    procedural_filter = not_(and_(
+        BillModel.bill_type == 'HRES',
+        BillModel.title.ilike('providing for consideration%')
+    ))
+
+    m = (
+        MemberModel.query
+        .options(
+            joinedload(MemberModel.vote_records)
+            .joinedload(VoteRecordModel.vote)
+            .joinedload(VoteModel.bill)
+        )
+        .filter_by(member_id=member_id)
+        .first_or_404()
+    )
+    # m = MemberModel.query.filter_by(member_id=member_id).first()
+
+    vote_records = (
+        VoteRecordModel.query
+        .join(VoteRecordModel.vote)
+        .join(VoteModel.bill)
+        .options(
+            contains_eager(VoteRecordModel.vote)
+            .contains_eager(VoteModel.bill)
+        )
+        .filter(VoteRecordModel.member_id == member_id)
+        .filter(keyword_filters)
+        .filter(procedural_filter)
+        .all()
+    )
 
     vote_data = []
-    for vr in m.vote_records:
-        vote = vr.vote  # backref from VoteRecordModel -> VoteModel
-        bill_title = vote.bill.title if vote.bill else None  # backref from VoteModel -> BillModel
+    for vr in vote_records:
+        vote = vr.vote
+        bill_title = vote.bill.title if vote.bill else None
         vote_data.append({
             'vote_id': vr.vote_id,
             'vote_date': vote.vote_date.isoformat() if vote.vote_date else None,
             'bill_title': bill_title,
+            'question': vote.question,
             'position': vr.position,
         })
 
