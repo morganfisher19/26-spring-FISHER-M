@@ -9,7 +9,7 @@ from silver/
 '''
 import json
 
-from config import GOLD_DIR, CONGRESS as congress
+from config import SILVER_DIR, GOLD_DIR, CONGRESS as congress
 from utils.helpers import import_silver, export_gold, cast_record
 
 
@@ -44,7 +44,7 @@ def correct_senate_bioguide_id():
             else:
                 vote["member_id"] = None  # unmatched case
 
-        with open(votes_path, "w", encoding="utf-8") as f:
+        with open(SILVER_DIR / votes_path, "w", encoding="utf-8") as f:
             json.dump(vote_data, f, indent=2)
 
     attach_bioguide_ids("senate_votes_119_1.json", member_lookup)

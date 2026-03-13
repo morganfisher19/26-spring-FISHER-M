@@ -106,11 +106,15 @@ def upsert_vote_records(cur):
         vr.get("position")
     ) for vr in vote_records
         if vr.get("vote_id") in valid_vote_ids and vr.get("member_id") in valid_member_ids]
+    
+    # Remove any rows with NULL member_id left over from before the fix
+    cur.execute("DELETE FROM vote_records WHERE member_id IS NULL")
 
     execute_values(cur, """
         INSERT INTO vote_records (vote_id, member_id, position)
         VALUES %s
-        ON CONFLICT (vote_id, member_id) DO NOTHING
+        ON CONFLICT (vote_id, member_id) DO UPDATE
+        SET position = EXCLUDED.position
     """, rows)
     print(f"  Vote records: {len(rows)} rows processed")
 
