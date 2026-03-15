@@ -3,9 +3,6 @@ Mapping out rest of the project:
 TO-DO:
 
 Phase 1: Member data pages
-    * Clean up voting tables to include important votes
-    * Add an issue area filter
-    * Create separate tabs where users can look at their sponsored bills & cosponsored bills
     * Include section in sponsored bills that includes bills that have passed
 
 Phase 2: Website Organization
@@ -19,7 +16,7 @@ Phase 3: Congressional Insights Analytics
     * Complete dashboard page with visualizations
 
 Phase 4: Styling
-    * Create neat layout
+    * Create neat, user-friendly layout
     * Implement cherry blossom theme
 
 Phase 5: Hosting
@@ -27,9 +24,11 @@ Phase 5: Hosting
     * host!
 
 
-Frontend:
-- Implement react w/ other frontend code
-- Work on styling to make
-
 
 DONE:
+Phase 1: Member data pages
+    * Clean up voting tables to include important votes
+    * Add an issue area filter
+    * Add links to the bills in congress.gov
+    * Create separate tabs where users can look at their sponsored bills & cosponsored bills
+

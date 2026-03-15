@@ -174,13 +174,16 @@ def get_member(member_id):
     vote_data = []
     for vr in vote_records:
         vote = vr.vote
-        bill_title = vote.bill.title if vote.bill else None
+        bill = vote.bill
         vote_data.append({
             'vote_id': vr.vote_id,
             'vote_date': vote.vote_date.isoformat() if vote.vote_date else None,
-            'bill_title': bill_title,
+            'bill_title': bill.title,
+            'bill_type': bill.bill_type,
+            'bill_num': bill.bill_num,
             'question': vote.question,
             'position': vr.position,
+            'policy_area': bill.policy_area if bill else None,
         })
 
     return jsonify({
@@ -192,6 +195,29 @@ def get_member(member_id):
         'vote_records': vote_data
     })
 
+@app.route('/api/member/<string:member_id>/sponsorships')
+def get_member_sponsorships(member_id):
+    sponsorships = (
+        BillSponsorshipModel.query
+        .join(BillSponsorshipModel.bill)
+        .options(contains_eager(BillSponsorshipModel.bill))
+        .filter(BillSponsorshipModel.member_id == member_id)
+        .all()
+    )
+
+    result = []
+    for s in sponsorships:
+        bill = s.bill
+        result.append({
+            'bill_id': s.bill_id,
+            'sponsor_type': s.sponsor_type,
+            'bill_title': bill.title if bill else None,
+            'bill_type': bill.bill_type if bill else None,
+            'bill_num': bill.bill_num if bill else None,
+            'policy_area': bill.policy_area if bill else None,
+        })
+
+    return jsonify(result)
 
 
 if __name__ == '__main__':
