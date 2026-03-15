@@ -4,6 +4,7 @@ TO-DO:
 
 Phase 1: Member data pages
     * Include section in sponsored bills that includes bills that have passed
+    * Add images to member pages
 
 Phase 2: Website Organization
     * Create dashboard page & about page

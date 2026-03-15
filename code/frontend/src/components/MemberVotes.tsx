@@ -145,10 +145,20 @@ export default function MemberVotes() {
 
       {/* Sticky header: member info + filter */}
       <div style={{ position: "sticky", top: 0, background: "white", zIndex: 10, paddingBottom: "0.5rem" }}>
-        <h2>{memberDetail.full_name}</h2>
-        <p>
-          {memberDetail.party} · {memberDetail.chamber === "H" ? "House" : "Senate"} · {memberDetail.state_name}
-        </p>
+        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+          <img
+            src={`/images/member_images/${memberDetail.member_id}.jpg`}
+            alt={memberDetail.full_name}
+            onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+            style={{ width: 80, height: 80, objectFit: "cover", borderRadius: "50%" }}
+          />
+          <div>
+            <h2 style={{ margin: 0 }}>{memberDetail.full_name}</h2>
+            <p style={{ margin: 0 }}>
+              {memberDetail.party} · {memberDetail.chamber === "H" ? "House" : "Senate"} · {memberDetail.state_name}
+            </p>
+          </div>
+        </div>
 
         <label htmlFor="policy-area-filter">Policy Area: </label>
         <select
