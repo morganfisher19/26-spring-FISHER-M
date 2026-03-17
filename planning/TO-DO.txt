@@ -4,7 +4,6 @@ TO-DO:
 
 Phase 1: Member data pages
     * Include section in sponsored bills that includes bills that have passed
-    * Add images to member pages
 
 Phase 2: Website Organization
     * Create dashboard page & about page
@@ -28,6 +27,7 @@ Phase 5: Hosting
 
 DONE:
 Phase 1: Member data pages
+    * Add images to member pages
     * Clean up voting tables to include important votes
     * Add an issue area filter
     * Add links to the bills in congress.gov
