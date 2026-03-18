@@ -49,16 +49,16 @@ from pipeline.transform.clean_bill_sponsorships import clean_bill_sponsorships
 from pipeline.transform.clean_laws import clean_laws
 
 
-clean_members()
-clean_bills()
-clean_votes()
-clean_vote_records()
-clean_vote_party_totals()
-clean_bill_sponsorships()
-clean_laws()
+# clean_members()
+# clean_bills()
+# clean_votes()
+# clean_vote_records()
+# clean_vote_party_totals()
+# clean_bill_sponsorships()
+# clean_laws()
 
 
 # # --- Load ---
-# from pipeline.load.update_db import update_db
+from pipeline.load.update_db import update_db
 
-# update_db()
+update_db()

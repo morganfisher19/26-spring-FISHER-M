@@ -32,7 +32,7 @@ class MemberModel(db.Model):
     district=db.Column(db.Integer)
     years_in_congress=db.Column(db.Integer)
     age=db.Column(db.Integer)
-    created_at=db.Column(db.DateTime(timezone=True))
+    # created_at=db.Column(db.DateTime(timezone=True))
     vote_records = db.relationship(
         'VoteRecordModel',
         backref='member',
@@ -53,7 +53,6 @@ class BillModel(db.Model):
     chamber=db.Column(db.String(1))
     title=db.Column(db.Text)
     policy_area=db.Column(db.Text)
-    created_at=db.Column(db.DateTime(timezone=True))
     votes = db.relationship(
         'VoteModel',
         backref='bill',
@@ -61,6 +60,11 @@ class BillModel(db.Model):
     )
     bill_sponsorships = db.relationship(
         'BillSponsorshipModel',
+        backref='bill',
+        lazy=True
+    )
+    laws = db.relationship(
+        'LawModel',
         backref='bill',
         lazy=True
     )
@@ -75,7 +79,6 @@ class VoteModel(db.Model):
     session_num=db.Column(db.Integer)
     vote_date=db.Column(db.DateTime(timezone=True))
     result=db.Column(db.Text)
-    created_at=db.Column(db.DateTime(timezone=True))
     vote_records = db.relationship(
         'VoteRecordModel',
         backref='vote',
@@ -92,7 +95,6 @@ class VoteRecordModel(db.Model):
     vote_id = db.Column(db.String(20), db.ForeignKey('votes.vote_id'), primary_key=True)
     member_id = db.Column(db.String(8), db.ForeignKey('members.member_id'), primary_key=True)
     position = db.Column(db.Text)
-    created_at=db.Column(db.DateTime(timezone=True))
 
 class VotePartyTotalModel(db.Model):
     __tablename__ = 'vote_party_totals'
@@ -102,15 +104,21 @@ class VotePartyTotalModel(db.Model):
     no_count=db.Column(db.Integer)
     present_count=db.Column(db.Integer)
     not_voting_count=db.Column(db.Integer)
-    created_at=db.Column(db.DateTime(timezone=True))
 
 class BillSponsorshipModel(db.Model):
     __tablename__='bill_sponsorships'
     bill_id=db.Column(db.String(20), db.ForeignKey('bills.bill_id'), primary_key=True)
     member_id = db.Column(db.String(8), db.ForeignKey('members.member_id'), primary_key=True)
     sponsor_type = db.Column(db.String(1), primary_key=True)
-    created_at=db.Column(db.DateTime(timezone=True))
 
+class LawModel(db.Model):
+    __tablename__='laws'
+    law_num=db.Column(db.Text, primary_key=True)
+    law_type=db.Column(db.Text)
+    bill_id=db.Column(db.String(20), db.ForeignKey('bills.bill_id'))
+    law_date=db.Column(db.DateTime(timezone=True))
+    congress=db.Column(db.Integer)
+    chamber=db.Column(db.String(1))
 
 # To check API is working:
 @app.route('/api/health')
@@ -164,6 +172,7 @@ def get_member(member_id):
         .options(
             contains_eager(VoteRecordModel.vote)
             .contains_eager(VoteModel.bill)
+            .joinedload(BillModel.laws)
         )
         .filter(VoteRecordModel.member_id == member_id)
         .filter(keyword_filters)
@@ -184,6 +193,7 @@ def get_member(member_id):
             'question': vote.question,
             'position': vr.position,
             'policy_area': bill.policy_area if bill else None,
+            'became_law': len(bill.laws) > 0,
         })
 
     return jsonify({
@@ -200,7 +210,10 @@ def get_member_sponsorships(member_id):
     sponsorships = (
         BillSponsorshipModel.query
         .join(BillSponsorshipModel.bill)
-        .options(contains_eager(BillSponsorshipModel.bill))
+        .options(
+            contains_eager(BillSponsorshipModel.bill)
+            .joinedload(BillModel.laws)
+        )
         .filter(BillSponsorshipModel.member_id == member_id)
         .all()
     )
@@ -215,6 +228,7 @@ def get_member_sponsorships(member_id):
             'bill_type': bill.bill_type if bill else None,
             'bill_num': bill.bill_num if bill else None,
             'policy_area': bill.policy_area if bill else None,
+            'became_law': len(bill.laws) > 0 if bill else False,
         })
 
     return jsonify(result)

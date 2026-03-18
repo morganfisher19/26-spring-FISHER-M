@@ -81,3 +81,14 @@ CREATE TABLE bill_sponsorships (
     FOREIGN KEY (bill_id) REFERENCES bills(bill_id),
     FOREIGN KEY (member_id) REFERENCES members(member_id)
 );
+
+CREATE TABLE laws (
+    law_num TEXT PRIMARY KEY,
+    law_type TEXT,
+    bill_id VARCHAR(20),
+    law_date TIMESTAMPTZ,
+    congress INT,
+    chamber CHAR(1),
+
+    FOREIGN KEY (bill_id) REFERENCES bills(bill_id)
+);

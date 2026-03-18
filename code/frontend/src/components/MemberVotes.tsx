@@ -11,6 +11,7 @@ interface VoteRecord {
   question: string;
   position: string;
   policy_area: string | null;
+  became_law: boolean; 
 }
 
 interface Sponsorship {
@@ -20,6 +21,7 @@ interface Sponsorship {
   bill_type: string | null;
   bill_num: number | null;
   policy_area: string | null;
+  became_law: boolean; 
 }
 
 
@@ -62,6 +64,16 @@ function BillLink({ title, billType, billNum }: { title: string | null; billType
     : <span>{title}</span>;
 }
 
+function LawBadge({ became_law }: { became_law: boolean }) {
+  if (!became_law) return null;
+  return (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem", marginLeft: "0.5rem" }}>
+      <span style={{ width: 8, height: 8, borderRadius: "50%", backgroundColor: "green", display: "inline-block" }} />
+      <span style={{ color: "green", fontSize: "0.85em" }}>Passed into law</span>
+    </span>
+  );
+}
+
 export default function MemberVotes() {
   const { memberId } = useParams<{ memberId: string }>();
   const navigate = useNavigate();
@@ -71,6 +83,8 @@ export default function MemberVotes() {
   const [error, setError] = useState<string | null>(null);
   const [selectedArea, setSelectedArea] = useState<string>("All Areas");
   const [activeTab, setActiveTab] = useState<Tab>("votes");
+  const [lawFilter, setLawFilter] = useState<boolean>(false);
+  
 
 
   // Fetch member detail when selection changes
@@ -112,21 +126,28 @@ export default function MemberVotes() {
 
   const filteredVotes = useMemo(() => {
     if (!memberDetail) return [];
-    if (selectedArea === "All Areas") return memberDetail.vote_records;
-    return memberDetail.vote_records.filter(vr => vr.policy_area === selectedArea);
-  }, [memberDetail, selectedArea]);
+    return memberDetail.vote_records.filter(vr => {
+      const areaMatch = selectedArea === "All Areas" || vr.policy_area === selectedArea;
+      const lawMatch = !lawFilter || vr.became_law;
+      return areaMatch && lawMatch;
+    });
+  }, [memberDetail, selectedArea, lawFilter]);
 
   const filteredSponsored = useMemo(() => {
-    const sponsored = sponsorships.filter(s => s.sponsor_type === "S");
-    if (selectedArea === "All Areas") return sponsored;
-    return sponsored.filter(s => s.policy_area === selectedArea);
-  }, [sponsorships, selectedArea]);
+    return sponsorships.filter(s => {
+      const areaMatch = selectedArea === "All Areas" || s.policy_area === selectedArea;
+      const lawMatch = !lawFilter || s.became_law;
+      return s.sponsor_type === "S" && areaMatch && lawMatch;
+    });
+  }, [sponsorships, selectedArea, lawFilter]);
 
   const filteredCosponsored = useMemo(() => {
-    const cosponsored = sponsorships.filter(s => s.sponsor_type === "C");
-    if (selectedArea === "All Areas") return cosponsored;
-    return cosponsored.filter(s => s.policy_area === selectedArea);
-  }, [sponsorships, selectedArea]);
+    return sponsorships.filter(s => {
+      const areaMatch = selectedArea === "All Areas" || s.policy_area === selectedArea;
+      const lawMatch = !lawFilter || s.became_law;
+      return s.sponsor_type === "C" && areaMatch && lawMatch;
+    });
+  }, [sponsorships, selectedArea, lawFilter]);
 
   const formatDate = (isoString: string) =>
     new Date(isoString).toLocaleDateString("en-US", {
@@ -172,6 +193,16 @@ export default function MemberVotes() {
           ))}
         </select>
 
+        <label style={{ marginLeft: "1rem" }}>
+          <input
+            type="checkbox"
+            checked={lawFilter}
+            onChange={e => setLawFilter(e.target.checked)}
+            style={{ marginRight: "0.25rem" }}
+          />
+          Passed into law
+        </label>
+
         {/* Tabs */}
         <div style={{ marginTop: "1rem" }}>
           {(["votes", "sponsored", "cosponsored"] as Tab[]).map(tab => (
@@ -203,7 +234,10 @@ export default function MemberVotes() {
               {filteredVotes.map(vr => (
                 <tr key={vr.vote_id}>
                   <td>{formatDate(vr.vote_date)}</td>
-                  <td><BillLink title={vr.bill_title} billType={vr.bill_type} billNum={vr.bill_num} /></td>
+                  <td>
+                    <BillLink title={vr.bill_title} billType={vr.bill_type} billNum={vr.bill_num} />
+                    <LawBadge became_law={vr.became_law} />
+                  </td>
                   <td>{vr.position}</td>
                 </tr>
               ))}
@@ -218,6 +252,7 @@ export default function MemberVotes() {
             {filteredSponsored.map(s => (
               <li key={s.bill_id}>
                 <BillLink title={s.bill_title} billType={s.bill_type} billNum={s.bill_num} />
+                <LawBadge became_law={s.became_law} />
               </li>
             ))}
           </ul>
@@ -230,6 +265,7 @@ export default function MemberVotes() {
             {filteredCosponsored.map(s => (
               <li key={s.bill_id}>
                 <BillLink title={s.bill_title} billType={s.bill_type} billNum={s.bill_num} />
+                <LawBadge became_law={s.became_law} />
               </li>
             ))}
           </ul>

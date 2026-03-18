@@ -35,7 +35,7 @@ def clean_laws():
             "law_num": law_number,
             "law_type": law_type,
             "bill_id": bill_id,
-            "date": date,
+            "law_date": date,
             "congress": congress,
             "chamber": chamber,
         })
@@ -45,7 +45,7 @@ def clean_laws():
         "law_num": str,
         "law_type": str,
         "bill_id": str,
-        "date": str,
+        "law_date": str,
         "congress": int,
         "chamber": str,
     }

@@ -10,6 +10,9 @@ import json
 import os
 from dotenv import load_dotenv
 
+from datetime import datetime
+import pytz
+
 from config import GOLD_DIR, DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD
 
 load_dotenv()
@@ -27,6 +30,13 @@ def get_connection():
 def load_gold(file_name):
     with open( GOLD_DIR / file_name, "r", encoding="utf-8") as f:
         return json.load(f)
+    
+def parse_law_date(date_str):
+    if not date_str:
+        return None
+    dt = datetime.strptime(date_str, "%Y-%m-%d")
+    eastern = pytz.timezone("US/Eastern")
+    return eastern.localize(dt.replace(hour=12))
 
 def upsert_members(cur):
     members = load_gold("members_119.json")
@@ -161,6 +171,33 @@ def upsert_bill_sponsorships(cur):
     """, rows)
     print(f"  Bill sponsorships: {len(rows)} rows processed")
 
+def upsert_laws(cur):
+    laws = load_gold("laws_119.json")
+    bills = load_gold("bills_119.json")
+
+    valid_bill_ids = {b.get("bill_id") for b in bills if b.get("bill_id")}
+
+    rows = [(
+        law.get("law_num"),
+        law.get("law_type"),
+        law.get("bill_id"),
+        parse_law_date(law.get("law_date")),
+        law.get("congress"),
+        law.get("chamber")
+    ) for law in laws
+        if law.get("bill_id") in valid_bill_ids]
+
+    execute_values(cur, """
+        INSERT INTO laws (law_num, law_type, bill_id, law_date, congress, chamber)
+        VALUES %s
+        ON CONFLICT (law_num) DO UPDATE SET
+            law_type = EXCLUDED.law_type,
+            bill_id  = EXCLUDED.bill_id,
+            law_date = EXCLUDED.law_date,
+            congress = EXCLUDED.congress,
+            chamber  = EXCLUDED.chamber
+    """, rows)
+    print(f"  Laws: {len(rows)} rows processed")
 
 def update_db():
     conn = get_connection()
@@ -173,6 +210,7 @@ def update_db():
         ("Vote Records",        upsert_vote_records),
         ("Vote Party Totals",   upsert_vote_party_totals),
         ("Bill Sponsorships",   upsert_bill_sponsorships),
+        ("Laws",                upsert_laws)
     ]
 
     for name, fn in steps:

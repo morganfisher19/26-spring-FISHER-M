@@ -2,7 +2,7 @@ Using SQL database:
 
 1. Open SQL Shell
 
-2. Enter in password (data4001)
+2. Enter in password
 
 To connect to db:
     \c congress_db
