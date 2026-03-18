@@ -18,7 +18,8 @@ from pipeline.extract.congress_api import (
     fetch_house_party_totals,
     fetch_members,
     fetch_bills,
-    fetch_bill_policy_area_and_sponsorship
+    fetch_bill_policy_area_and_sponsorship,
+    fetch_laws
 )
 from pipeline.extract.congress_xml import (
     fetch_senate_rollcall,
@@ -28,14 +29,15 @@ from pipeline.extract.congress_build import (
     fetch_senate_party_totals
 )
 
-fetch_house_rollcall()
-fetch_house_party_totals()
-fetch_members()
-fetch_bills()
-fetch_bill_policy_area_and_sponsorship()
-fetch_senate_rollcall()
-fetch_all_member_votes()
-fetch_senate_party_totals()
+# fetch_house_rollcall()
+# fetch_house_party_totals()
+# fetch_members()
+# fetch_bills()
+# fetch_bill_policy_area_and_sponsorship()
+# fetch_senate_rollcall()
+# fetch_all_member_votes()
+# fetch_senate_party_totals()
+# fetch_laws()
 
 # --- Transform ---
 from pipeline.transform.clean_members import clean_members
@@ -44,6 +46,8 @@ from pipeline.transform.clean_votes import clean_votes
 from pipeline.transform.clean_vote_records import clean_vote_records
 from pipeline.transform.clean_vote_party_totals import clean_vote_party_totals
 from pipeline.transform.clean_bill_sponsorships import clean_bill_sponsorships
+from pipeline.transform.clean_laws import clean_laws
+
 
 clean_members()
 clean_bills()
@@ -51,9 +55,10 @@ clean_votes()
 clean_vote_records()
 clean_vote_party_totals()
 clean_bill_sponsorships()
+clean_laws()
 
 
-# --- Load ---
-from pipeline.load.update_db import update_db
+# # --- Load ---
+# from pipeline.load.update_db import update_db
 
-update_db()
+# update_db()

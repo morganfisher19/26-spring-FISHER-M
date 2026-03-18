@@ -8,6 +8,7 @@ data extracted:
 - house vote party totals
 - bill policy area
 - bill sponsorship
+- laws
 
 '''
 
@@ -34,7 +35,7 @@ retrieved_at = datetime.now(timezone.utc).isoformat()
 # Function for extracting API data
 def get_api_info(search_string, max_retries=5):
     url = f"{base_url}/{search_string}&api_key={API_KEY}"
-    # print(url) #DEBUGGING: DELETE LATER
+    print(url) #DEBUGGING: DELETE LATER
     for i in range(max_retries):
         response = session.get(url)
         if response.status_code == 200:
@@ -110,6 +111,23 @@ def fetch_bills():
     }
 
     save_to_file(final_payload, f"{output_path}/bills_119.json")
+    print("Fetch complete!")
+
+def fetch_laws():
+    print("Fetching laws!")    
+
+    search_string = f"law/119?format=json&offset=0&limit=250"
+    laws = get_api_info(search_string)
+
+
+    final_payload = {
+        "source": "https://api.congress.gov/",
+        "retrieved_at": retrieved_at,
+        "congress": 119,
+        "pages": laws
+    }
+
+    save_to_file(final_payload, f"{output_path}/laws_119.json")
     print("Fetch complete!")
 
 def fetch_house_rollcall():
