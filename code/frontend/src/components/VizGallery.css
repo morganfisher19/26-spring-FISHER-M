@@ -1,0 +1,55 @@
+.viz-gallery-page {
+  padding: 2rem;
+}
+
+.viz-gallery-page h1 {
+  margin-bottom: 1.5rem;
+}
+
+.viz-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.viz-card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.viz-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+}
+
+.viz-thumbnail {
+  width: 100%;
+  height: 180px;
+  background-color: #e8e8e8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.viz-thumbnail-placeholder {
+  color: #999;
+  font-size: 0.9rem;
+}
+
+.viz-card-body {
+  padding: 1rem;
+}
+
+.viz-card-body h2 {
+  font-size: 1rem;
+  margin: 0 0 0.4rem;
+}
+
+.viz-card-body p {
+  font-size: 0.85rem;
+  color: #666;
+  margin: 0;
+}

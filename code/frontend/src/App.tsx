@@ -1,13 +1,21 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import MemberSelect from "./components/MemberSelect";
 import MemberVotes from "./components/MemberVotes";
+import About from "./components/About";
+import VizGallery from "./components/VizGallery";
+import VizDetail from "./components/VizDetail";
+import Navbar from "./components/Navbar";
 
 export default function App() {
   return (
     <BrowserRouter>
+      <Navbar />
       <Routes>
         <Route path="/" element={<MemberSelect />} />
         <Route path="/member/:memberId" element={<MemberVotes />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/visualizations" element={<VizGallery />} />
+        <Route path="/visualizations/:vizId" element={<VizDetail />} />
       </Routes>
     </BrowserRouter>
   );

@@ -2,13 +2,6 @@ Mapping out rest of the project:
 
 TO-DO:
 
-Phase 1: Member data pages
-    * Include section in sponsored bills that includes bills that have passed
-
-Phase 2: Website Organization
-    * Create dashboard page & about page
-    * Create Nav Bar at top for homepage access, dashboard page(s) & about page
-
 Phase 3: Congressional Insights Analytics
     * Explore data to find insights
     * Create simple visualizations
@@ -26,10 +19,15 @@ Phase 5: Hosting
 
 
 DONE:
+
 Phase 1: Member data pages
     * Add images to member pages
     * Clean up voting tables to include important votes
     * Add an issue area filter
     * Add links to the bills in congress.gov
     * Create separate tabs where users can look at their sponsored bills & cosponsored bills
+    * Include section in sponsored bills that includes bills that have passed
 
+Phase 2: Website Organization
+    * Create dashboard page & about page
+    * Create Nav Bar at top for homepage access, dashboard page(s) & about page
