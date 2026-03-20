@@ -4,7 +4,7 @@
   justify-content: space-between;
   padding: 0 2rem;
   height: 60px;
-  background-color: #1a1a2e;
+  background-color: #FFB3C1;
   color: white;
   position: sticky;
   top: 0;
@@ -17,6 +17,10 @@
   letter-spacing: 0.05em;
 }
 
+.navbar .navbar-brand {
+  color: white;
+}
+
 .navbar-links {
   list-style: none;
   display: flex;
@@ -26,7 +30,7 @@
 }
 
 .navbar-links a {
-  color: #ccc;
+  color: white;
   text-decoration: none;
   font-size: 0.95rem;
   transition: color 0.2s;

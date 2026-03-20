@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import "./MemberSelect.css";
 
 interface Member {
   member_id: string;
@@ -37,7 +38,7 @@ export default function MemberSelect() {
   if (error) return <p>Error: {error}</p>;
 
   return (
-    <div>
+    <div className="member-select-form">
       <select value={selectedId} onChange={(e) => setSelectedId(e.target.value)}>
         <option value="">-- Select a Member --</option>
         {members.map((m) => (

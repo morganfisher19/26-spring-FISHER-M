@@ -13,7 +13,7 @@ Phase 4: Styling
     * Implement cherry blossom theme
 
 Phase 5: Hosting
-    * Find a medium to host website & database
+    * Find a place to host website & database
     * host!
 
 

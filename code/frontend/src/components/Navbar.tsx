@@ -12,7 +12,7 @@ export default function Navbar() {
 
   return (
     <nav className="navbar">
-      <div className="navbar-brand">CongressWatch</div>
+      <div className="navbar-brand">CongressSearch</div>
       <ul className="navbar-links">
         {links.map(({ label, path }) => (
           <li key={path}>

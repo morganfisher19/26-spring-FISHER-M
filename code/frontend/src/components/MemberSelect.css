@@ -1,0 +1,51 @@
+.member-select-card {
+  background: white;
+  border-radius: 12px;
+  border: 0.5px solid #f4c0d1;
+  padding: 2rem 2.5rem;
+  max-width: 420px;
+  margin: 3rem auto;
+}
+
+.member-select-form {
+  display: flex;
+  flex-direction: column; /* this is what stacks them */
+  gap: 12px;
+  width: 50%;
+}
+
+select {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1.5px solid #ed93b1;
+  font-size: 14px;
+  appearance: none;
+  cursor: pointer;
+}
+
+select:focus {
+  outline: none;
+  border-color: #d4537e;
+}
+
+button {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: none;
+  background: #d4537e;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+button:hover:not(:disabled) {
+  background: #c03a6a;
+}
+
+button:disabled {
+  background: #f4c0d1;
+  cursor: not-allowed;
+}
