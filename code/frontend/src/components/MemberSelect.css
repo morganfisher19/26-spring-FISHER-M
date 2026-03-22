@@ -39,6 +39,8 @@ button {
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
+  font-family: 'Playfair Display', serif;
+
 }
 
 button:hover:not(:disabled) {

@@ -1,3 +1,78 @@
 body, p {
     color: #FF758F !important;
 }
+
+/* ── Hero: two columns side by side ── */
+main {
+  display: flex;
+  flex-direction: column;
+}
+
+.hero {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+/* ── Left: layered image stack ── */
+.imageStack {
+  position: relative;
+  flex: 1;
+}
+
+.branch {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 60%;
+  transform: scaleX(-1);
+  z-index: 2; 
+}
+
+.capitol {
+  position: relative;
+  width: 100%;
+  margin-top: 30%;
+  z-index: 1;
+}
+
+/* ── Right: stacked text + select ── */
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;   /* vertical centering */
+  align-items: center;       /* horizontal centering */
+  text-align: center;
+  gap: 0.5rem;
+  font-family: 'Playfair Display', serif;
+
+}
+
+.content h1 {
+  font-size: 4rem;
+  margin: 0;
+}
+
+.content h2 {
+  font-size: 2rem;
+  margin: 0;
+  font-weight: 400;
+  color: #555;
+}
+
+.content p {
+  margin: 0 0 1rem;
+  color: #666;
+  font-size: 1.1rem;
+}
+
+/* ── Repeating banner image ── */
+.repeatBanner {
+  width: 100%;
+  height: 40px;           /* set to match your image's natural height */
+  margin-top: 3rem;
+  background-image: url("../../public/images/flowers-1.png");
+  background-repeat: repeat-x;  /* repeats horizontally across the full width */
+  background-size: auto 100%;   /* keeps aspect ratio, fills the height */
+}
