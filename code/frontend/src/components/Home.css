@@ -1,5 +1,6 @@
-body, p {
-    color: #FF758F !important;
+body, h2, p {
+    color: #E6677F !important;
+    /* color: #d4537e */
 }
 
 /* ── Hero: two columns side by side ── */

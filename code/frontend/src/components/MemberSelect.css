@@ -22,6 +22,7 @@ select {
   font-size: 14px;
   appearance: none;
   cursor: pointer;
+  font-family: serif;
 }
 
 select:focus {
@@ -32,9 +33,9 @@ select:focus {
 button {
   width: 100%;
   padding: 10px 12px;
-  border-radius: 8px;
+  border-radius: 50px !important;
   border: none;
-  background: #d4537e;
+  background: #FF758F;
   color: white;
   font-size: 14px;
   font-weight: 500;
@@ -44,10 +45,10 @@ button {
 }
 
 button:hover:not(:disabled) {
-  background: #c03a6a;
+  background: #E6677F;
 }
 
 button:disabled {
-  background: #f4c0d1;
+  background: #FFB3C1;
   cursor: not-allowed;
 }

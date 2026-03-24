@@ -1,4 +1,6 @@
 import MemberSelect from "./MemberSelect";
+import VizGallery from "./VizGallery";
+import About from "./About";
 import "./Home.css";
 
 export default function Home() {
@@ -25,7 +27,16 @@ export default function Home() {
       <div>
         <div className="repeatBanner" />
       </div>
-      
+
+      <section>
+        <VizGallery />
+      </section>
+      <div>
+        <div className="repeatBanner" />
+      </div>
+      <section>
+        <About />
+      </section>
     </main>
     </>
   );

@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import "./MemberVotes.css";
 
 
 interface VoteRecord {
@@ -60,7 +61,7 @@ function BillLink({ title, billType, billNum }: { title: string | null; billType
   const url = buildCongressUrl(billType, billNum);
   if (!title) return <span>—</span>;
   return url
-    ? <a href={url} target="_blank" rel="noopener noreferrer">{title}</a>
+    ? <a className="billLink" href={url} target="_blank" rel="noopener noreferrer">{title}</a>
     : <span>{title}</span>;
 }
 
@@ -162,26 +163,23 @@ export default function MemberVotes() {
 
   return (
     <div>
-      <button onClick={() => navigate(-1)}>← Back</button>
-
-      {/* Sticky header: member info + filter */}
-      <div style={{ position: "sticky", top: 0, background: "white", zIndex: 10, paddingBottom: "0.5rem" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-          <img
-            src={`/images/member_images/${memberDetail.member_id}.jpg`}
-            alt={memberDetail.full_name}
-            onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
-            style={{ width: 80, height: 80, objectFit: "cover", borderRadius: "50%" }}
-          />
-          <div>
-            <h2 style={{ margin: 0 }}>{memberDetail.full_name}</h2>
-            <p style={{ margin: 0 }}>
-              {memberDetail.party} · {memberDetail.chamber === "H" ? "House" : "Senate"} · {memberDetail.state_name}
-            </p>
-          </div>
+      <section className="memberInfo">
+        <img
+          src={`/images/member_images/${memberDetail.member_id}.jpg`}
+          alt={memberDetail.full_name}
+          onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+          className="memberAvatar"
+        />
+        <div>
+          <h2>{memberDetail.full_name}</h2>
+          <p className="memberMeta">
+            {memberDetail.party} · {memberDetail.chamber === "H" ? "House" : "Senate"} · {memberDetail.state_name}
+          </p>
         </div>
+      </section>
 
-        <label htmlFor="policy-area-filter">Policy Area: </label>
+      <section className="filter">
+        <label htmlFor="policy-area-filter">Policy Area:</label>
         <select
           id="policy-area-filter"
           value={selectedArea}
@@ -193,23 +191,23 @@ export default function MemberVotes() {
           ))}
         </select>
 
-        <label style={{ marginLeft: "1rem" }}>
+        <label className="checkboxLabel">
           <input
             type="checkbox"
             checked={lawFilter}
             onChange={e => setLawFilter(e.target.checked)}
-            style={{ marginRight: "0.25rem" }}
           />
           Passed into law
         </label>
+      </section>
 
-        {/* Tabs */}
-        <div style={{ marginTop: "1rem" }}>
+      <section className="tabs">
+        <div className="tabButtons">
           {(["votes", "sponsored", "cosponsored"] as Tab[]).map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              style={{ fontWeight: activeTab === tab ? "bold" : "normal", marginRight: "0.5rem" }}
+              className={activeTab === tab ? "tabBtn active" : "tabBtn"}
             >
               {tab === "votes" ? `Voting Records (${filteredVotes.length})`
                 : tab === "sponsored" ? `Sponsored Bills (${filteredSponsored.length})`
@@ -217,60 +215,62 @@ export default function MemberVotes() {
             </button>
           ))}
         </div>
-      </div>
+      </section>
 
-      {/* Tab content */}
-      {activeTab === "votes" && (
-        filteredVotes.length === 0 ? <p>No vote records found.</p> : (
-          <table>
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Bill Title</th>
-                <th>Position</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredVotes.map(vr => (
-                <tr key={vr.vote_id}>
-                  <td>{formatDate(vr.vote_date)}</td>
-                  <td>
-                    <BillLink title={vr.bill_title} billType={vr.bill_type} billNum={vr.bill_num} />
-                    <LawBadge became_law={vr.became_law} />
-                  </td>
-                  <td>{vr.position}</td>
+      <section className="tabContent">
+        {/* Tab content */}
+        {activeTab === "votes" && (
+          filteredVotes.length === 0 ? <p>No vote records found.</p> : (
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Bill Title</th>
+                  <th>Position</th>
                 </tr>
+              </thead>
+              <tbody>
+                {filteredVotes.map(vr => (
+                  <tr key={vr.vote_id}>
+                    <td>{formatDate(vr.vote_date)}</td>
+                    <td>
+                      <BillLink title={vr.bill_title} billType={vr.bill_type} billNum={vr.bill_num} />
+                      <LawBadge became_law={vr.became_law} />
+                    </td>
+                    <td>{vr.position}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )
+        )}
+
+        {activeTab === "sponsored" && (
+          filteredSponsored.length === 0 ? <p>No sponsored bills found.</p> : (
+            <ul>
+              {filteredSponsored.map(s => (
+                <li key={s.bill_id}>
+                  <BillLink title={s.bill_title} billType={s.bill_type} billNum={s.bill_num} />
+                  <LawBadge became_law={s.became_law} />
+                </li>
               ))}
-            </tbody>
-          </table>
-        )
-      )}
+            </ul>
+          )
+        )}
 
-      {activeTab === "sponsored" && (
-        filteredSponsored.length === 0 ? <p>No sponsored bills found.</p> : (
-          <ul>
-            {filteredSponsored.map(s => (
-              <li key={s.bill_id}>
-                <BillLink title={s.bill_title} billType={s.bill_type} billNum={s.bill_num} />
-                <LawBadge became_law={s.became_law} />
-              </li>
-            ))}
-          </ul>
-        )
-      )}
-
-      {activeTab === "cosponsored" && (
-        filteredCosponsored.length === 0 ? <p>No cosponsored bills found.</p> : (
-          <ul>
-            {filteredCosponsored.map(s => (
-              <li key={s.bill_id}>
-                <BillLink title={s.bill_title} billType={s.bill_type} billNum={s.bill_num} />
-                <LawBadge became_law={s.became_law} />
-              </li>
-            ))}
-          </ul>
-        )
-      )}
+        {activeTab === "cosponsored" && (
+          filteredCosponsored.length === 0 ? <p>No cosponsored bills found.</p> : (
+            <ul>
+              {filteredCosponsored.map(s => (
+                <li key={s.bill_id}>
+                  <BillLink title={s.bill_title} billType={s.bill_type} billNum={s.bill_num} />
+                  <LawBadge became_law={s.became_law} />
+                </li>
+              ))}
+            </ul>
+          )
+        )}
+      </section>
     </div>
   );
 }

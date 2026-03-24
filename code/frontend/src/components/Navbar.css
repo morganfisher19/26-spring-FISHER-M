@@ -2,7 +2,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 2rem;
+  margin: 0 1rem;
   height: 60px;
   background-color: #FFB3C1;
   color: white;
@@ -17,10 +17,7 @@
   font-size: 1.2rem;
   font-weight: 700;
   letter-spacing: 0.05em;
-}
-
-.navbar .navbar-brand {
-  color: white;
+  color: white !important;
 }
 
 .navbar-links {
@@ -38,8 +35,7 @@
   transition: color 0.2s;
 }
 
-.navbar-links a:hover,
-.navbar-links a.active {
+.navbar-links a:hover {
   color: white;
   border-bottom: 2px solid white;
   padding-bottom: 2px;

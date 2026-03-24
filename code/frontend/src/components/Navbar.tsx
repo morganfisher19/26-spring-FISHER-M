@@ -6,13 +6,13 @@ export default function Navbar() {
 
   const links = [
     { label: "Home", path: "/" },
-    { label: "About", path: "/about" },
-    { label: "Data Visualizations", path: "/visualizations" },
+    // { label: "About", path: "/about" },
+    // { label: "Data Visualizations", path: "/visualizations" },
   ];
 
   return (
     <nav className="navbar">
-      <div className="navbar-brand">CongressSearch</div>
+      <div className="navbar-brand">Congress Search</div>
       <ul className="navbar-links">
         {links.map(({ label, path }) => (
           <li key={path}>

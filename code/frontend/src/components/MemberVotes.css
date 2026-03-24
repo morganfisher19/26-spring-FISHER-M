@@ -1,0 +1,139 @@
+.memberInfo,
+.filter,
+.tabs, .tabContent {
+  top: 0;
+  z-index: 10;
+  padding-bottom: 0.5rem;
+  margin: 1rem;
+  position: static;
+}
+
+.memberInfo {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-family: 'Playfair Display', serif;
+}
+
+.memberAvatar {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.memberInfo h2 {
+  margin: 0;
+  font-size: 3rem;
+}
+
+.memberMeta {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+/* Filter row */
+.filter {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-bottom: 0.5rem;
+  max-width: fit-content;
+}
+
+.filter label {
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.filter select {
+  width: 300px;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* Tab buttons row */
+.tabButtons {
+  display: flex;
+  gap: 0;
+  margin-top: 1rem;
+  border-bottom: 2px solid #666;
+}
+
+.tabBtn {
+  font-weight: normal;
+  font-size: 0.95rem;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  color: #666;
+  border-radius: 0px !important;
+}
+
+.tabBtn.active {
+  font-weight: bold;
+  border-bottom: 2px solid #FF758F;
+  color: #FF758F;
+}
+
+.tabBtn:hover {
+  color: #FF758F;
+  background: none !important;
+}
+
+/* Table */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+th {
+  text-align: left;
+  padding: 0.5rem 1rem;
+  border-bottom: 2px solid #ddd;
+  font-weight: bold;
+  color: #333;
+}
+
+td {
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid #eee;
+  vertical-align: top;
+}
+
+td:first-child, td:last-child {
+  white-space: nowrap;
+}
+
+/* Bill links */
+.billLink {
+  color: inherit;
+  text-decoration: none;
+}
+
+.billLink:hover {
+  color: pink;
+}
+
+/* Sponsored / cosponsored list */
+
+.tabContent ul {
+  list-style: none;
+}
+
+.tabContent li {
+  padding: 1rem 0;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.1rem;
+}
