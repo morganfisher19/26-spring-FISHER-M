@@ -35,7 +35,7 @@ retrieved_at = datetime.now(timezone.utc).isoformat()
 # Function for extracting API data
 def get_api_info(search_string, max_retries=5):
     url = f"{base_url}/{search_string}&api_key={API_KEY}"
-    print(url) #DEBUGGING: DELETE LATER
+    # print(url) #DEBUGGING: DELETE LATER
     for i in range(max_retries):
         response = session.get(url)
         if response.status_code == 200:

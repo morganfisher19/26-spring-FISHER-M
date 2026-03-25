@@ -22,7 +22,6 @@ select {
   font-size: 14px;
   appearance: none;
   cursor: pointer;
-  font-family: serif;
 }
 
 select:focus {
@@ -40,8 +39,6 @@ button {
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  font-family: 'Playfair Display', serif;
-
 }
 
 button:hover:not(:disabled) {

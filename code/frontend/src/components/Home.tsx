@@ -7,7 +7,7 @@ export default function Home() {
   return (
    <>
    <main>
-      <section className="hero">
+      <section className="memberMonitorContent">
         {/* Left: stacked/layered images */}
         <div className="imageStack">
           <img className="branch" src="../../public/images/branch-2.png" alt="" />
@@ -16,7 +16,7 @@ export default function Home() {
 
         {/* Right: text + member select */}
         <div className="content">
-          <h1>Congress Search</h1>
+          <h1>Member Monitor</h1>
           <h2>119th Congress</h2>
           <p>Select a member to explore their voting record.</p>
           <MemberSelect />

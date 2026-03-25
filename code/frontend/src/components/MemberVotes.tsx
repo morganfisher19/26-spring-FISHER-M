@@ -77,7 +77,6 @@ function LawBadge({ became_law }: { became_law: boolean }) {
 
 export default function MemberVotes() {
   const { memberId } = useParams<{ memberId: string }>();
-  const navigate = useNavigate();
   const [memberDetail, setMemberDetail] = useState<MemberDetail | null>(null);
   const [sponsorships, setSponsorships] = useState<Sponsorship[]>([]);
   const [loading, setLoading] = useState<boolean>(true);

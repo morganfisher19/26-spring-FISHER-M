@@ -1,0 +1,109 @@
+.aboutSection {
+  padding: 32px;
+}
+
+.row {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.row .middle {
+  flex: 1;
+}
+
+.row div img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Flip card setup */
+.flower-wrapper {
+  flex: 3;
+  perspective: 800px;
+}
+
+.flower-inner {
+  position: relative;
+  width: 100%;
+  transform-style: preserve-3d;
+  transition: transform 1.2s ease;
+}
+
+.flower-wrapper:hover .flower-inner {
+  transform: rotateY(180deg);
+}
+
+.flower-front,
+.flower-back {
+  width: 100%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.flower-front {
+  position: relative;
+}
+
+.flower-back {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: rotateY(180deg);
+}
+
+ellipse {
+    background: #FFB3C1;
+}
+
+/* Front text */
+.flowerText {
+  font-size: 3.5px;
+  word-wrap: break-word;
+  text-align: center;
+  font-weight: bold;
+  line-height: 1.2;
+  padding: 0 5px;
+}
+
+/* Back content */
+.flowerBackContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 3px;
+}
+
+.flowerBackContent a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  text-decoration: none;
+}
+
+.backIcon {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  cursor: pointer;
+}
+
+.backLabel {
+  font-size: 3px;
+  font-weight: bold;
+  color: #333;
+  text-align: center;
+  color: rgb(230, 103, 127);
+}
+
+.headshotIcon {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 1px solid rgb(230, 103, 127);
+}

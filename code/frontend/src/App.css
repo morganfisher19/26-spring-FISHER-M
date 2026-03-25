@@ -11,5 +11,8 @@ body {
   );
 
   background-repeat: no-repeat;
-  
+
+  h1 {
+    font-family: 'Playfair Display', serif;
+  }
 }
