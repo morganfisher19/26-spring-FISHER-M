@@ -2,6 +2,11 @@ import { useNavigate } from "react-router-dom";
 import "./VizGallery.css";
 
 export const VISUALIZATIONS = [
+    {
+    id: "bipartisanship",
+    title: "Bipartisanship Within Congress",
+    description: "Placeholder description",
+  },
   {
     id: "bill-survival",
     title: "How a Bill Survives Congress",
@@ -10,11 +15,6 @@ export const VISUALIZATIONS = [
   {
     id: "activity-over-time",
     title: "Congressional Activity Over Time",
-    description: "Placeholder description",
-  },
-  {
-    id: "bipartisanship",
-    title: "Bipartisanship Within Congress",
     description: "Placeholder description",
   },
 ];

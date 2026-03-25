@@ -234,6 +234,110 @@ def get_member_sponsorships(member_id):
     return jsonify(result)
 
 
+# Data visualizations
+@app.route('/api/visualizations/bipartisanship')
+def get_bipartisanship():
+    chamber = request.args.get("chamber")        # 'H' or 'S'
+    party = request.args.get("party")            # 'D', 'R', 'I'
+    policy_area = request.args.get("policy_area") # e.g. 'Health'
+    
+    PASSAGE_KEYWORDS = [
+        "Passage", "Pass", "Agreeing to the Resolution",
+        "Joint Resolution", "Concurrent Resolution",
+        "Concur in the Senate Amendment"
+    ]
+    
+    keyword_filters = or_(
+        *[VoteModel.question.ilike(f'%{kw}%') for kw in PASSAGE_KEYWORDS]
+    )
+
+    procedural_filter = not_(and_(
+        BillModel.bill_type == 'HRES',
+        BillModel.title.ilike('providing for consideration%')
+    ))
+
+    query = (
+        VoteModel.query
+        .join(VoteModel.bill)
+        .join(VoteModel.vote_party_totals)
+        .options(
+            contains_eager(VoteModel.vote_party_totals),
+            contains_eager(VoteModel.bill)
+        )
+        .filter(keyword_filters)
+        .filter(procedural_filter)
+    )
+
+    if chamber:
+        query = query.filter(VoteModel.chamber == chamber)
+    if policy_area:
+        query = query.filter(BillModel.policy_area == policy_area)
+
+    votes = query.order_by(VoteModel.vote_date).all()
+
+    result = []
+    for vote in votes:
+        # Filter party totals if party param is provided
+        party_totals = vote.vote_party_totals
+        if party:
+            party_totals = [pt for pt in party_totals if pt.party == party]
+
+        result.append({
+            'vote_id': vote.vote_id,
+            'vote_date': vote.vote_date.isoformat() if vote.vote_date else None,
+            'question': vote.question,
+            'result': vote.result,
+            'chamber': vote.chamber,
+            'bill_id': vote.bill_id,
+            'policy_area': vote.bill.policy_area if vote.bill else None,
+            'party_totals': [
+                {
+                    'party': pt.party,
+                    'yes_count': pt.yes_count,
+                    'no_count': pt.no_count,
+                    'present_count': pt.present_count,
+                    'not_voting_count': pt.not_voting_count,
+                    # Bipartisanship score: % of party that voted yes
+                    'yes_pct': round(
+                        pt.yes_count / (pt.yes_count + pt.no_count + pt.present_count)
+                        if (pt.yes_count + pt.no_count + pt.present_count) > 0
+                        else 0,
+                        4
+                    )
+                }
+                for pt in party_totals
+            ]
+        })
+
+    return jsonify(result)
+'''
+
+A few things worth noting:
+
+**The `yes_pct` field** — this is what you'll actually plot in D3. A bipartisanship metric you can derive from this is the difference in `yes_pct` between R and D on the same vote. Votes where both parties have high `yes_pct` are bipartisan; votes where one is high and one is low are partisan.
+
+**The `party` filter** is applied in Python after the query rather than in SQL because you're already eager-loading all party totals per vote — filtering in SQL there would break the eager load and you'd lose the other parties' data for cross-party comparison. If you only ever need one party, move it to SQL.
+
+**Example URLs your frontend will call:**
+```
+/api/visualizations/bipartisanship
+/api/visualizations/bipartisanship?chamber=H
+/api/visualizations/bipartisanship?chamber=S&policy_area=Health
+
+Second route:
+@app.route('/api/bills/policy-areas')
+def get_policy_areas():
+    areas = (
+        db.session.query(BillModel.policy_area)
+        .filter(BillModel.policy_area.isnot(None))
+        .distinct()
+        .order_by(BillModel.policy_area)
+        .all()
+    )
+    return jsonify([a[0] for a in areas])
+
+'''
+
 if __name__ == '__main__':
     # Note: debug=False in production
     app.run(debug=True)
