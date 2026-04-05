@@ -23,6 +23,15 @@ def correct_senate_bioguide_id():
     member_lookup = {}
 
     for m in members:
+        last_name = m.get("last_name")
+        party = m.get("party")
+        state = m.get("state_name")
+        bioguide_id = m.get("member_id")
+
+        if not all([last_name, party, state, bioguide_id]):
+            print(f"Skipping member with missing fields: {m}")
+            continue
+
         last_name = m["last_name"].strip()
         party = m["party"].strip()
         state = m["state_name"].strip()

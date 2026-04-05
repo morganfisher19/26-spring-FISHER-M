@@ -26,7 +26,9 @@ from pipeline.extract.congress_xml import (
     fetch_all_member_votes
 )
 from pipeline.extract.congress_build import (
-    fetch_senate_party_totals
+    fetch_senate_party_totals,
+    fetch_member_bios,
+    fetch_member_images
 )
 
 fetch_house_rollcall()
@@ -38,6 +40,17 @@ fetch_senate_rollcall()
 fetch_all_member_votes()
 fetch_senate_party_totals()
 fetch_laws()
+
+'''
+ONLY RUN IF MEMBER BIO DATA IS OUTDATED
+
+But first download new json file from link:
+https://bioguide.congress.gov/search?index=%22bioguideprofiles%22&size=96&matches=[]&filters=%7B%22jobPositions.congressAffiliation.congress.name%22:[%22The%20119th%20United%20States%20Congress%22]%7D&sort=[%7B%22_score%22:true%7D,%7B%22field%22:%22unaccentedFamilyName%22,%22order%22:%22asc%22%7D,%7B%22field%22:%22unaccentedGivenName%22,%22order%22:%22asc%22%7D,%7B%22field%22:%22unaccentedMiddleName%22,%22order%22:%22asc%22%7D]&view=%22Table%22
+
+And put json file in this path: data/references/raw_member_bios_119.json
+'''
+# fetch_member_bios()
+# fetch_member_images()
 
 # --- Transform ---
 from pipeline.transform.clean_members import clean_members
@@ -62,3 +75,5 @@ clean_laws()
 from pipeline.load.update_db import update_db
 
 update_db()
+
+

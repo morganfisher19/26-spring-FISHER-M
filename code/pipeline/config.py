@@ -28,6 +28,8 @@ GOLD_DIR = DATA_DIR / "gold"
 CACHE_DIR = DATA_DIR / "cache"
 REFERENCE_DIR = DATA_DIR / "references"
 
+MEMBER_IMAGE_DIR = ROOT_DIR / "code/frontend/public/images/member_images"
+
 # --- Congress ---
 CONGRESS = 119
 CURRENT_YEAR = 2026

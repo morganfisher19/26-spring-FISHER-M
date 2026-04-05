@@ -105,7 +105,7 @@ def clean_members():
             clean_members.append(clean_member)
 
     # Load raw JSON member bios data
-    with open(REFERENCE_DIR / "member_bios_119.json", "r") as f:
+    with open(SILVER_DIR / "member_bios_119.json", "r") as f:
         raw_bio_data = json.load(f)
 
     clean_bios = []
@@ -135,13 +135,25 @@ def clean_members():
     # Convert bios list into dictionary for fast lookup
     bios_lookup = {bio["member_id"]: bio for bio in clean_bios}
 
+    BIO_DOWNLOAD_URL = (
+        "https://bioguide.congress.gov/search?index=%22bioguideprofiles%22&size=96&matches=[]"
+        "&filters=%7B%22jobPositions.congressAffiliation.congress.name%22:[%22The%20119th%20United%20States%20Congress%22]%7D"
+        "&sort=[%7B%22_score%22:true%7D,%7B%22field%22:%22unaccentedFamilyName%22,%22order%22:%22asc%22%7D,"
+        "%7B%22field%22:%22unaccentedGivenName%22,%22order%22:%22asc%22%7D,"
+        "%7B%22field%22:%22unaccentedMiddleName%22,%22order%22:%22asc%22%7D]&view=%22Table%22"
+    )
+
     merged_members = []
+    missing_bios = []
 
     for member in clean_members:
         member_id = member["member_id"]
 
-        # Get matching bio (if exists)
-        bio = bios_lookup.get(member_id, {})
+        bio = bios_lookup.get(member_id)
+
+        if bio is None:
+            missing_bios.append(member_id)
+            continue
 
         merged_member = {
             "member_id": member_id,
@@ -158,6 +170,12 @@ def clean_members():
 
         merged_members.append(merged_member)
 
+    if missing_bios:
+        raise ValueError(
+            f"Member bio data out of date. Missing bio(s) for member ID(s): {', '.join(missing_bios)}\n"
+            f"Download new json file here:\n{BIO_DOWNLOAD_URL}"
+        )
+    
     # Make sure data type is correct
     TYPE_MAP_MEMBERS = {
         "member_id": str,

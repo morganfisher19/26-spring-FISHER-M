@@ -9,14 +9,19 @@ import json
 import re
 from collections import defaultdict
 from datetime import datetime, timezone
+import requests
+from pathlib import Path
+from time import sleep
 
-from config import SILVER_DIR, CONGRESS as congress
+from config import REFERENCE_DIR, SILVER_DIR, MEMBER_IMAGE_DIR, CONGRESS as congress
 from utils.helpers import save_to_file
+
+
 
 output_path = SILVER_DIR
 retrieved_at = datetime.now(timezone.utc).isoformat()
 
-# TODO: FIX & TEST
+
 def fetch_senate_party_totals():
     print("Fetching senate party totals!")
 
@@ -108,3 +113,66 @@ def fetch_senate_party_totals():
 
     print("Fetch complete!")
 
+
+def fetch_member_bios():
+    print("Transforming member bios!")
+
+    # Load raw JSON member bios data
+    with open(REFERENCE_DIR / "raw_member_bios_119.json", "r") as f:
+        data = json.load(f)
+
+    with open(SILVER_DIR / "member_bios_119.json", "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=4, ensure_ascii=False)
+
+    print(f"Complete!")
+
+def fetch_member_images():
+    INPUT_FILE = SILVER_DIR / "members_119.json"
+    OUTPUT_DIR = MEMBER_IMAGE_DIR
+    
+
+    with open(INPUT_FILE, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    session = requests.Session()
+    session.headers.update({"User-Agent": "Mozilla/5.0"})
+
+    success, skipped, failed = 0, 0, 0
+
+    for page in data.get("pages", []):
+        for member in page.get("members", []):
+            bioguide_id = member.get("bioguideId")
+            image_url = member.get("depiction", {}).get("imageUrl")
+
+            # Fix malformed URLs with duplicate https://
+            if image_url:
+                second = image_url.find("https://", 1)
+                if second != -1:
+                    image_url = image_url[second:]
+
+            if not bioguide_id or not image_url:
+                print(f"Skipping {bioguide_id or 'unknown'}: missing data")
+                skipped += 1
+                continue
+
+            # Preserve original file extension (.jpg, .png, etc.)
+            ext = Path(image_url.split("?")[0]).suffix or ".jpg"
+            out_path = OUTPUT_DIR / f"{bioguide_id}{ext}"
+
+            if out_path.exists():
+                # print(f"Skipping {bioguide_id}: already downloaded")
+                skipped += 1
+                continue
+
+            try:
+                r = session.get(image_url, timeout=10)
+                r.raise_for_status()
+                out_path.write_bytes(r.content)
+                print(f"Saved {bioguide_id}{ext}")
+                success += 1
+                sleep(0.1)  # be polite
+            except requests.RequestException as e:
+                print(f"Failed {bioguide_id}: {e}")
+                failed += 1
+
+    print(f"\nDone — {success} saved, {skipped} skipped, {failed} failed")
