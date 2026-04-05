@@ -52,6 +52,15 @@ def clean_laws():
 
     cleaned_laws = [cast_record(r, TYPE_MAP_LAWS) for r in cleaned_laws]
 
+    # Handle duplicate law_nums by appending "-duplicate"
+    seen = {}
+    for law in cleaned_laws:
+        law_num = law["law_num"]
+        if law_num in seen:
+            law["law_num"] = f"{law_num}-duplicate"
+        else:
+            seen[law_num] = True
+
     # Check data:
     print("Total records:", len(cleaned_laws))
     print("Unique IDs:", len(set(r["law_num"] for r in cleaned_laws)))

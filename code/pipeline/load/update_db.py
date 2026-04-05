@@ -172,10 +172,19 @@ def upsert_bill_sponsorships(cur):
     print(f"  Bill sponsorships: {len(rows)} rows processed")
 
 def upsert_laws(cur):
+
+    #TODO: Add better unique key for laws to prevent duplicates
+
     laws = load_gold("laws_119.json")
     bills = load_gold("bills_119.json")
 
     valid_bill_ids = {b.get("bill_id") for b in bills if b.get("bill_id")}
+
+    # Deduplicate by law_num, keeping last occurrence
+    seen = {}
+    for law in laws:
+        if law.get("bill_id") in valid_bill_ids and law.get("law_num"):
+            seen[law["law_num"]] = law
 
     rows = [(
         law.get("law_num"),
