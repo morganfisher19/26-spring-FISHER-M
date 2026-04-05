@@ -15,110 +15,110 @@ app = Flask(__name__)
 CORS(app)
 
 # Connect to the database
-app.config['SQLALCHEMY_DATABASE_URI']=f'postgresql://postgres:{DB_PASSWORD}@localhost/congress_db'
+app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://postgres:{DB_PASSWORD}@localhost/congress_db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db=SQLAlchemy(app)
+db = SQLAlchemy(app)
 
 # Define models
 class MemberModel(db.Model):
-    __tablename__='members'
-    member_id=db.Column(db.String(8), primary_key=True)
-    full_name=db.Column(db.Text)
-    first_name=db.Column(db.Text)
-    last_name=db.Column(db.Text)
-    party=db.Column(db.String(1))
-    chamber=db.Column(db.String(1))
-    state_name=db.Column(db.String(2))
-    district=db.Column(db.Integer)
-    years_in_congress=db.Column(db.Integer)
-    age=db.Column(db.Integer)
-    # created_at=db.Column(db.DateTime(timezone=True))
+    __tablename__ = 'members'
+    member_id = db.Column(db.String(8), primary_key = True)
+    full_name = db.Column(db.Text)
+    first_name = db.Column(db.Text)
+    last_name = db.Column(db.Text)
+    party = db.Column(db.String(1))
+    chamber = db.Column(db.String(1))
+    state_name = db.Column(db.String(2))
+    district = db.Column(db.Integer)
+    years_in_congress = db.Column(db.Integer)
+    age = db.Column(db.Integer)
+    # created_at = db.Column(db.DateTime(timezone = True))
     vote_records = db.relationship(
         'VoteRecordModel',
-        backref='member',
-        lazy=True
+        backref = 'member',
+        lazy = True
     )
     bill_sponsorships = db.relationship(
         'BillSponsorshipModel',
-        backref='member',
-        lazy=True
+        backref = 'member',
+        lazy = True
     )
 
 class BillModel(db.Model):
-    __tablename__='bills'
-    bill_id=db.Column(db.String(20), primary_key=True)
-    bill_type=db.Column(db.Text)
-    bill_num=db.Column(db.Integer)
-    congress=db.Column(db.Integer)
-    chamber=db.Column(db.String(1))
-    title=db.Column(db.Text)
-    policy_area=db.Column(db.Text)
+    __tablename__ = 'bills'
+    bill_id = db.Column(db.String(20), primary_key = True)
+    bill_type = db.Column(db.Text)
+    bill_num = db.Column(db.Integer)
+    congress = db.Column(db.Integer)
+    chamber = db.Column(db.String(1))
+    title = db.Column(db.Text)
+    policy_area = db.Column(db.Text)
     votes = db.relationship(
         'VoteModel',
-        backref='bill',
-        lazy=True
+        backref = 'bill',
+        lazy = True
     )
     bill_sponsorships = db.relationship(
         'BillSponsorshipModel',
-        backref='bill',
-        lazy=True
+        backref = 'bill',
+        lazy = True
     )
     laws = db.relationship(
         'LawModel',
-        backref='bill',
-        lazy=True
+        backref = 'bill',
+        lazy = True
     )
 
 class VoteModel(db.Model):
     __tablename__ = 'votes'
-    vote_id=db.Column(db.String(20), primary_key=True)
-    bill_id=db.Column(db.String(20), db.ForeignKey('bills.bill_id'))
-    question=db.Column(db.Text)
-    chamber=db.Column(db.String(1))
-    congress=db.Column(db.Integer)
-    session_num=db.Column(db.Integer)
-    vote_date=db.Column(db.DateTime(timezone=True))
-    result=db.Column(db.Text)
+    vote_id = db.Column(db.String(20), primary_key = True)
+    bill_id = db.Column(db.String(20), db.ForeignKey('bills.bill_id'))
+    question = db.Column(db.Text)
+    chamber = db.Column(db.String(1))
+    congress = db.Column(db.Integer)
+    session_num = db.Column(db.Integer)
+    vote_date = db.Column(db.DateTime(timezone = True))
+    result = db.Column(db.Text)
     vote_records = db.relationship(
         'VoteRecordModel',
-        backref='vote',
-        lazy=True
+        backref = 'vote',
+        lazy = True
     )
     vote_party_totals = db.relationship(
         'VotePartyTotalModel',
-        backref='vote',
-        lazy=True
+        backref = 'vote',
+        lazy = True
     )
 
 class VoteRecordModel(db.Model):
     __tablename__ = 'vote_records'
-    vote_id = db.Column(db.String(20), db.ForeignKey('votes.vote_id'), primary_key=True)
-    member_id = db.Column(db.String(8), db.ForeignKey('members.member_id'), primary_key=True)
+    vote_id = db.Column(db.String(20), db.ForeignKey('votes.vote_id'), primary_key = True)
+    member_id = db.Column(db.String(8), db.ForeignKey('members.member_id'), primary_key = True)
     position = db.Column(db.Text)
 
 class VotePartyTotalModel(db.Model):
     __tablename__ = 'vote_party_totals'
-    vote_id = db.Column(db.String(20), db.ForeignKey('votes.vote_id'), primary_key=True)
-    party = db.Column(db.String(1), primary_key=True)
-    yes_count=db.Column(db.Integer)
-    no_count=db.Column(db.Integer)
-    present_count=db.Column(db.Integer)
-    not_voting_count=db.Column(db.Integer)
+    vote_id = db.Column(db.String(20), db.ForeignKey('votes.vote_id'), primary_key = True)
+    party = db.Column(db.String(1), primary_key = True)
+    yes_count = db.Column(db.Integer)
+    no_count = db.Column(db.Integer)
+    present_count = db.Column(db.Integer)
+    not_voting_count = db.Column(db.Integer)
 
 class BillSponsorshipModel(db.Model):
-    __tablename__='bill_sponsorships'
-    bill_id=db.Column(db.String(20), db.ForeignKey('bills.bill_id'), primary_key=True)
-    member_id = db.Column(db.String(8), db.ForeignKey('members.member_id'), primary_key=True)
-    sponsor_type = db.Column(db.String(1), primary_key=True)
+    __tablename__ = 'bill_sponsorships'
+    bill_id = db.Column(db.String(20), db.ForeignKey('bills.bill_id'), primary_key = True)
+    member_id = db.Column(db.String(8), db.ForeignKey('members.member_id'), primary_key = True)
+    sponsor_type = db.Column(db.String(1), primary_key = True)
 
 class LawModel(db.Model):
-    __tablename__='laws'
-    law_num=db.Column(db.Text, primary_key=True)
-    law_type=db.Column(db.Text)
-    bill_id=db.Column(db.String(20), db.ForeignKey('bills.bill_id'))
-    law_date=db.Column(db.DateTime(timezone=True))
-    congress=db.Column(db.Integer)
-    chamber=db.Column(db.String(1))
+    __tablename__ = 'laws'
+    law_num = db.Column(db.Text, primary_key = True)
+    law_type = db.Column(db.Text)
+    bill_id = db.Column(db.String(20), db.ForeignKey('bills.bill_id'))
+    law_date = db.Column(db.DateTime(timezone = True))
+    congress = db.Column(db.Integer)
+    chamber = db.Column(db.String(1))
 
 # To check API is working:
 @app.route('/api/health')
@@ -160,10 +160,10 @@ def get_member(member_id):
             .joinedload(VoteRecordModel.vote)
             .joinedload(VoteModel.bill)
         )
-        .filter_by(member_id=member_id)
+        .filter_by(member_id = member_id)
         .first_or_404()
     )
-    # m = MemberModel.query.filter_by(member_id=member_id).first()
+    # m = MemberModel.query.filter_by(member_id = member_id).first()
 
     vote_records = (
         VoteRecordModel.query
@@ -271,7 +271,7 @@ def get_bipartisanship():
     if chamber:
         query = query.filter(VoteModel.chamber == chamber)
     if policy_area:
-        query = query.filter(BillModel.policy_area == policy_area)
+        query = query.filter(BillModel.policy_area ==  policy_area)
 
     votes = query.order_by(VoteModel.vote_date).all()
 
@@ -321,8 +321,8 @@ A few things worth noting:
 **Example URLs your frontend will call:**
 ```
 /api/visualizations/bipartisanship
-/api/visualizations/bipartisanship?chamber=H
-/api/visualizations/bipartisanship?chamber=S&policy_area=Health
+/api/visualizations/bipartisanship?chamber = H
+/api/visualizations/bipartisanship?chamber = S&policy_area = Health
 
 Second route:
 @app.route('/api/bills/policy-areas')
@@ -339,6 +339,6 @@ def get_policy_areas():
 '''
 
 if __name__ == '__main__':
-    # Note: debug=False in production
-    app.run(debug=True)
-    # app.run(host='0.0.0.0', port=8000, debug=True)
+    # Note: debug = False in production
+    app.run(debug = True)
+    # app.run(host = '0.0.0.0', port = 8000, debug = True)

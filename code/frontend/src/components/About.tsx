@@ -47,7 +47,7 @@ export default function About() {
                 <foreignObject x="25" y="28" width="50" height="44">
                   <div className="flowerBackContent">
                     <a href="https://github.com/morganfisher19/26-spring-FISHER-M" target="_blank" rel="noopener noreferrer">
-                      <img src="../../public/images/github-logo.png" alt="GitHub" className="backIcon" />
+                      <img src="../../images/github-logo.png" alt="GitHub" className="backIcon" />
                       <span className="backLabel">Open Source Code Found Here</span>
                     </a>
                   </div>
@@ -59,7 +59,7 @@ export default function About() {
         </div>
 
         <div className="middle">
-          <img src="../../public/images/tree-3.png" alt="tree" />
+          <img src="../../images/tree-3.png" alt="tree" />
         </div>
 
         {/* Right Flower - LinkedIn */}
@@ -103,7 +103,7 @@ export default function About() {
                 <foreignObject x="20" y="20" width="60" height="60">
                   <div className="flowerBackContent">
                     <a href="https://www.linkedin.com/in/morganfisher19" target="_blank" rel="noopener noreferrer">
-                      <img src="../../public/images/headshot.jpg" alt="LinkedIn" className="headshotIcon" />
+                      <img src="../../images/headshot.jpg" alt="LinkedIn" className="headshotIcon" />
                     </a>
                   </div>
                 </foreignObject>

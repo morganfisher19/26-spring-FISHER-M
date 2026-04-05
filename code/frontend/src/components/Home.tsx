@@ -10,8 +10,8 @@ export default function Home() {
       <section className="memberMonitorContent">
         {/* Left: stacked/layered images */}
         <div className="imageStack">
-          <img className="branch" src="../../public/images/branch-2.png" alt="" />
-          <img className="capitol" src="../../public/images/capitol-4.png" alt="" />
+          <img className="branch" src="../../images/branch-2.png" alt="" />
+          <img className="capitol" src="../../images/capitol-4.png" alt="" />
         </div>
 
         {/* Right: text + member select */}
