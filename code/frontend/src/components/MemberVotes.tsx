@@ -50,6 +50,11 @@ const BILL_TYPE_MAP: Record<string, string> = {
   SCONRES: "senate-concurrent-resolution",
 };
 
+function formatDisplayName(fullName: string): string {
+  const [last, first] = fullName.split(",").map((s) => s.trim());
+  return first && last ? `${first} ${last}` : fullName;
+}
+
 function buildCongressUrl(billType: string | null, billNum: number | null): string | null {
   if (!billType || !billNum) return null;
   const slug = BILL_TYPE_MAP[billType];
@@ -165,12 +170,12 @@ export default function MemberVotes() {
       <section className="memberInfo">
         <img
           src={`/images/member_images/${memberDetail.member_id}.jpg`}
-          alt={memberDetail.full_name}
+          alt={formatDisplayName(memberDetail.full_name)}
           onError={e => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
           className="memberAvatar"
         />
         <div>
-          <h2>{memberDetail.full_name}</h2>
+          <h2>{formatDisplayName(memberDetail.full_name)}</h2>
           <p className="memberMeta">
             {memberDetail.party} · {memberDetail.chamber === "H" ? "House" : "Senate"} · {memberDetail.state_name}
           </p>

@@ -131,7 +131,13 @@ def get_members():
     members = MemberModel.query.order_by(MemberModel.full_name).all()
     return jsonify([{
         'member_id': m.member_id,
-        'full_name': m.full_name
+        'full_name' : m.full_name,
+        'first_name': m.first_name,
+        'last_name': m.last_name,
+        'party': m.party,
+        'chamber': m.chamber,
+        'state_name': m.state_name,
+        'district': m.district
     } for m in members])
 
 # Keywords for filtering member votes
@@ -310,33 +316,6 @@ def get_bipartisanship():
         })
 
     return jsonify(result)
-'''
-
-A few things worth noting:
-
-**The `yes_pct` field** — this is what you'll actually plot in D3. A bipartisanship metric you can derive from this is the difference in `yes_pct` between R and D on the same vote. Votes where both parties have high `yes_pct` are bipartisan; votes where one is high and one is low are partisan.
-
-**The `party` filter** is applied in Python after the query rather than in SQL because you're already eager-loading all party totals per vote — filtering in SQL there would break the eager load and you'd lose the other parties' data for cross-party comparison. If you only ever need one party, move it to SQL.
-
-**Example URLs your frontend will call:**
-```
-/api/visualizations/bipartisanship
-/api/visualizations/bipartisanship?chamber = H
-/api/visualizations/bipartisanship?chamber = S&policy_area = Health
-
-Second route:
-@app.route('/api/bills/policy-areas')
-def get_policy_areas():
-    areas = (
-        db.session.query(BillModel.policy_area)
-        .filter(BillModel.policy_area.isnot(None))
-        .distinct()
-        .order_by(BillModel.policy_area)
-        .all()
-    )
-    return jsonify([a[0] for a in areas])
-
-'''
 
 if __name__ == '__main__':
     # Note: debug = False in production
