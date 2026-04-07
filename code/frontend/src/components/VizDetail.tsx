@@ -8,7 +8,6 @@ const VIZ_COMPONENTS: Record<string, React.ComponentType> = {
 
 export default function VizDetail() {
   const { vizId } = useParams();
-  const navigate = useNavigate();
 
   const viz = VISUALIZATIONS.find((v) => v.id === vizId);
 
@@ -16,7 +15,6 @@ export default function VizDetail() {
     return (
       <div style={{ padding: "2rem" }}>
         <p>Visualization not found.</p>
-        <button onClick={() => navigate("/visualizations")}>← Back</button>
       </div>
     );
   }
@@ -25,9 +23,6 @@ export default function VizDetail() {
 
   return (
     <div style={{ padding: "2rem" }}>
-      <button onClick={() => navigate("/visualizations")} style={{ marginBottom: "1rem" }}>
-        ← Back to Gallery
-      </button>
       <h1>{viz.title}</h1>
       <p>{viz.description}</p>
       <div style={{ marginTop: "1.5rem" }}>

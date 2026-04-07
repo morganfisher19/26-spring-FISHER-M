@@ -23,7 +23,7 @@ export default function About() {
                   <ellipse cx="0" cy="-20" rx="12" ry="20" fill="#FFB3C1" transform="rotate(270)"/>
                   <ellipse cx="0" cy="-20" rx="12" ry="20" fill="#FFB3C1" transform="rotate(315)"/>
                 </g>
-                <foreignObject x="20" y="35" width="60" height="30">
+                  <foreignObject x="20" y="30" width="60" height="60">
                   <div className="flowerText">
                     Member Monitor was designed and developed using publicly accessible data to provide a free, user-friendly way to explore member's legislative activity.
                   </div>
@@ -79,7 +79,7 @@ export default function About() {
                   <ellipse cx="0" cy="-20" rx="12" ry="20" fill="#FFB3C1" transform="rotate(270)"/>
                   <ellipse cx="0" cy="-20" rx="12" ry="20" fill="#FFB3C1" transform="rotate(315)"/>
                 </g>
-                <foreignObject x="20" y="35" width="60" height="30">
+                <foreignObject x="20" y="30" width="60" height="60">
                   <div className="flowerText">
                     Morgan Fisher built Member Monitor for her senior capstone project at the George Washington University. The website combines her interests in politics, data, & coding.
                   </div>

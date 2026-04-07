@@ -57,13 +57,23 @@ ellipse {
 }
 
 /* Front text */
+/* Front text as white on dark pink circular background */
 .flowerText {
-  font-size: 3.5px;
+  font-size: 2.5px;
+  font-weight: 500;
+  line-height: 1.2;
   word-wrap: break-word;
   text-align: center;
-  font-weight: bold;
-  line-height: 1.2;
-  padding: 0 5px;
+  color: white;
+  background-color: #E6677F;
+  border-radius: 50%;
+  padding: 3px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 40px;
+  height: 40px;
+  margin: 0 auto;
 }
 
 /* Back content */
