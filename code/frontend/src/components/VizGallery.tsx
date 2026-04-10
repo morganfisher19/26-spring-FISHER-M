@@ -17,6 +17,11 @@ export const VISUALIZATIONS = [
     title: "Congressional Activity Over Time",
     description: "Placeholder description",
   },
+  { id: "top-influencers",
+    title: "Top Influencers in Congress",
+    description: "Placeholder description"
+  },
+
 ];
 
 export default function VizGallery() {

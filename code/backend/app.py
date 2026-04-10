@@ -4,6 +4,7 @@ import os
 from flask_cors import CORS
 from sqlalchemy.orm import joinedload, contains_eager
 from sqlalchemy import or_, and_, not_
+from sqlalchemy import func, case, distinct
 
 # Connect to frontend
 
@@ -147,7 +148,7 @@ PASSAGE_KEYWORDS = [
     "Concur in the Senate Amendment"
 ]
 
-# Get individual member data for individual member pages
+# Get individual member voting data for individual member pages
 @app.route('/api/member/<string:member_id>')
 def get_member(member_id):
     keyword_filters = or_(
@@ -211,6 +212,7 @@ def get_member(member_id):
         'vote_records': vote_data
     })
 
+# Get individual member sponsorship data
 @app.route('/api/member/<string:member_id>/sponsorships')
 def get_member_sponsorships(member_id):
     sponsorships = (
@@ -241,17 +243,13 @@ def get_member_sponsorships(member_id):
 
 
 # Data visualizations
+
+# BIPARTISANSHIP WITHIN CONGRESS
 @app.route('/api/visualizations/bipartisanship')
 def get_bipartisanship():
     chamber = request.args.get("chamber")        # 'H' or 'S'
     party = request.args.get("party")            # 'D', 'R', 'I'
     policy_area = request.args.get("policy_area") # e.g. 'Health'
-    
-    PASSAGE_KEYWORDS = [
-        "Passage", "Pass", "Agreeing to the Resolution",
-        "Joint Resolution", "Concurrent Resolution",
-        "Concur in the Senate Amendment"
-    ]
     
     keyword_filters = or_(
         *[VoteModel.question.ilike(f'%{kw}%') for kw in PASSAGE_KEYWORDS]
@@ -316,6 +314,274 @@ def get_bipartisanship():
         })
 
     return jsonify(result)
+
+# ─────────────────────────────────────────────
+# 2) HOW A BILL SURVIVES CONGRESS
+# Funnel: introduced → voted on → passed one chamber
+#         → passed both chambers → became law
+# ─────────────────────────────────────────────
+@app.route('/api/visualizations/bill_funnel')
+def get_bill_funnel():
+
+    # Total bills introduced
+    total_introduced = BillModel.query.count()
+
+    # Bills that have at least one vote
+    voted_on = (
+        db.session.query(func.count(distinct(VoteModel.bill_id)))
+        .filter(VoteModel.bill_id.isnot(None))
+        .scalar()
+    )
+
+    # Bills that passed at least one chamber
+    # A bill "passed" a chamber if any vote on it has a passing result
+    PASS_RESULTS = ["Passed", "Agreed to"]
+    pass_result_filter = or_(*[VoteModel.result.ilike(f'%{r}%') for r in PASS_RESULTS])
+
+    passed_one = (
+        db.session.query(func.count(distinct(VoteModel.bill_id)))
+        .filter(pass_result_filter)
+        .scalar()
+    )
+
+    # Bills that passed both chambers:
+    # bill_id appears in passing votes from BOTH 'H' and 'S'
+    h_passed = (
+        db.session.query(VoteModel.bill_id)
+        .filter(pass_result_filter, VoteModel.chamber == 'H')
+        .distinct()
+        .subquery()
+    )
+    s_passed = (
+        db.session.query(VoteModel.bill_id)
+        .filter(pass_result_filter, VoteModel.chamber == 'S')
+        .distinct()
+        .subquery()
+    )
+    passed_both = (
+        db.session.query(func.count())
+        .select_from(h_passed)
+        .join(s_passed, h_passed.c.bill_id == s_passed.c.bill_id)
+        .scalar()
+    )
+
+    # Bills that became law
+    became_law = db.session.query(func.count(distinct(LawModel.bill_id))).scalar()
+
+    return jsonify({
+        'stages': [
+            {'label': 'Introduced',         'count': total_introduced},
+            {'label': 'Voted On',           'count': voted_on},
+            {'label': 'Passed One Chamber', 'count': passed_one},
+            {'label': 'Passed Both',        'count': passed_both},
+            {'label': 'Became Law',         'count': became_law},
+        ]
+    })
+
+
+# ─────────────────────────────────────────────
+# 3) CONGRESSIONAL ACTIVITY OVER TIME
+# Query params:
+#   chamber     — 'H' | 'S'               (optional)
+#   granularity — 'day' | 'week' | 'month' (default: week)
+#   policy_area — e.g. 'Health'            (optional)
+# ─────────────────────────────────────────────
+@app.route('/api/visualizations/activity_over_time')
+def get_activity_over_time():
+    chamber     = request.args.get('chamber')
+    granularity = request.args.get('granularity', 'week')
+    policy_area = request.args.get('policy_area')
+
+    # Date truncation based on granularity
+    trunc_map = {
+        'day':   'day',
+        'week':  'week',
+        'month': 'month',
+    }
+    trunc = trunc_map.get(granularity, 'week')
+    period = func.date_trunc(trunc, VoteModel.vote_date)
+
+    query = (
+        db.session.query(
+            period.label('period'),
+            func.count(VoteModel.vote_id).label('vote_count')
+        )
+        .join(VoteModel.bill)
+        .filter(VoteModel.vote_date.isnot(None))
+    )
+
+    if chamber:
+        query = query.filter(VoteModel.chamber == chamber)
+    if policy_area:
+        query = query.filter(BillModel.policy_area == policy_area)
+
+    rows = (
+        query
+        .group_by(period)
+        .order_by(period)
+        .all()
+    )
+
+    return jsonify({
+        'granularity': granularity,
+        'data': [
+            {
+                'period':     r.period.isoformat() if r.period else None,
+                'vote_count': r.vote_count
+            }
+            for r in rows
+        ]
+    })
+
+
+# ─────────────────────────────────────────────
+# 4) TOP INFLUENCERS IN CONGRESS
+# Query params:
+#   metric      — 'laws' | 'sponsored' | 'cosponsors' (default: laws)
+#   chamber     — 'H' | 'S'                            (optional)
+#   party       — 'D' | 'R' | 'I'                      (optional)
+#   policy_area — e.g. 'Health'                         (optional)
+#   limit       — int, default 10
+# ─────────────────────────────────────────────
+@app.route('/api/visualizations/top_influencers')
+def get_top_influencers():
+    metric      = request.args.get('metric', 'laws')
+    chamber     = request.args.get('chamber')
+    party       = request.args.get('party')
+    policy_area = request.args.get('policy_area')
+    limit       = int(request.args.get('limit', 10))
+
+    # Base member filters (shared across all metrics)
+    def apply_member_filters(q):
+        if chamber:
+            q = q.filter(MemberModel.chamber == chamber)
+        if party:
+            q = q.filter(MemberModel.party == party)
+        return q
+
+    if metric == 'laws':
+        # Members ranked by number of distinct bills they sponsored that became law
+        q = (
+            db.session.query(
+                MemberModel.member_id,
+                MemberModel.full_name,
+                MemberModel.party,
+                MemberModel.chamber,
+                MemberModel.state_name,
+                func.count(distinct(LawModel.law_num)).label('score')
+            )
+            .join(BillSponsorshipModel, MemberModel.member_id == BillSponsorshipModel.member_id)
+            .join(BillModel, BillSponsorshipModel.bill_id == BillModel.bill_id)
+            .join(LawModel, BillModel.bill_id == LawModel.bill_id)
+            .filter(BillSponsorshipModel.sponsor_type == 'S')  # primary sponsors only
+        )
+        if policy_area:
+            q = q.filter(BillModel.policy_area == policy_area)
+        q = apply_member_filters(q)
+        q = q.group_by(
+            MemberModel.member_id,
+            MemberModel.full_name,
+            MemberModel.party,
+            MemberModel.chamber,
+            MemberModel.state_name
+        ).order_by(func.count(distinct(LawModel.law_num)).desc()).limit(limit)
+
+    elif metric == 'sponsored':
+        # Members ranked by number of bills sponsored
+        q = (
+            db.session.query(
+                MemberModel.member_id,
+                MemberModel.full_name,
+                MemberModel.party,
+                MemberModel.chamber,
+                MemberModel.state_name,
+                func.count(distinct(BillSponsorshipModel.bill_id)).label('score')
+            )
+            .join(BillSponsorshipModel, MemberModel.member_id == BillSponsorshipModel.member_id)
+            .join(BillModel, BillSponsorshipModel.bill_id == BillModel.bill_id)
+            .filter(BillSponsorshipModel.sponsor_type == 'S')
+        )
+        if policy_area:
+            q = q.filter(BillModel.policy_area == policy_area)
+        q = apply_member_filters(q)
+        q = q.group_by(
+            MemberModel.member_id,
+            MemberModel.full_name,
+            MemberModel.party,
+            MemberModel.chamber,
+            MemberModel.state_name
+        ).order_by(func.count(distinct(BillSponsorshipModel.bill_id)).desc()).limit(limit)
+
+    elif metric == 'cosponsors':
+        # Members ranked by number of cosponsors their sponsored bills attracted
+        cosponsor_count = (
+            db.session.query(
+                BillSponsorshipModel.bill_id,
+                func.count(BillSponsorshipModel.member_id).label('n')
+            )
+            .filter(BillSponsorshipModel.sponsor_type == 'C')
+            .group_by(BillSponsorshipModel.bill_id)
+            .subquery()
+        )
+        q = (
+            db.session.query(
+                MemberModel.member_id,
+                MemberModel.full_name,
+                MemberModel.party,
+                MemberModel.chamber,
+                MemberModel.state_name,
+                func.coalesce(func.sum(cosponsor_count.c.n), 0).label('score')
+            )
+            .join(BillSponsorshipModel, MemberModel.member_id == BillSponsorshipModel.member_id)
+            .join(BillModel, BillSponsorshipModel.bill_id == BillModel.bill_id)
+            .outerjoin(cosponsor_count, BillModel.bill_id == cosponsor_count.c.bill_id)
+            .filter(BillSponsorshipModel.sponsor_type == 'S')
+        )
+        if policy_area:
+            q = q.filter(BillModel.policy_area == policy_area)
+        q = apply_member_filters(q)
+        q = q.group_by(
+            MemberModel.member_id,
+            MemberModel.full_name,
+            MemberModel.party,
+            MemberModel.chamber,
+            MemberModel.state_name
+        ).order_by(func.coalesce(func.sum(cosponsor_count.c.n), 0).desc()).limit(limit)
+
+    else:
+        return jsonify({'error': f'Unknown metric: {metric}'}), 400
+
+    rows = q.all()
+
+    return jsonify({
+        'metric': metric,
+        'data': [
+            {
+                'member_id':  r.member_id,
+                'full_name':  r.full_name,
+                'party':      r.party,
+                'chamber':    r.chamber,
+                'state_name': r.state_name,
+                'score':      r.score,
+            }
+            for r in rows
+        ]
+    })
+
+
+# ─────────────────────────────────────────────
+# HELPER: distinct policy areas (useful for filter dropdowns)
+# ─────────────────────────────────────────────
+@app.route('/api/policy_areas')
+def get_policy_areas():
+    rows = (
+        db.session.query(BillModel.policy_area)
+        .filter(BillModel.policy_area.isnot(None))
+        .distinct()
+        .order_by(BillModel.policy_area)
+        .all()
+    )
+    return jsonify([r.policy_area for r in rows])
 
 if __name__ == '__main__':
     # Note: debug = False in production
