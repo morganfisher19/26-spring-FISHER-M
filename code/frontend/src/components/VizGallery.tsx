@@ -5,7 +5,7 @@ export const VISUALIZATIONS = [
     {
     id: "bipartisanship",
     title: "Bipartisanship Within Congress",
-    description: "Placeholder description",
+    description: "How often do the parties agree with one another?",
   },
   {
     id: "bill-survival",

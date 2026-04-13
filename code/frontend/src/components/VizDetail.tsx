@@ -4,6 +4,7 @@ import VizBipartisanship from "./visualizations/VizBipartisanship.tsx";
 import VizBillSurvival from "./visualizations/VizBillSurvival.tsx";
 import VizActivityOverTime from "./visualizations/VizActivityOverTime.tsx";
 import VizTopInfluencers from "./visualizations/VizTopInfluencers.tsx";
+import "./VizDetail.css";
 
 const VIZ_COMPONENTS: Record<string, React.ComponentType> = {
   "bipartisanship":     VizBipartisanship,
@@ -29,25 +30,14 @@ export default function VizDetail() {
   const VizComponent = vizId ? VIZ_COMPONENTS[vizId] : null;
 
   return (
-    <div style={{ padding: "2rem" }}>
+    <div className='viz-container'>
       <h1>{viz.title}</h1>
       <p>{viz.description}</p>
-      <div style={{ marginTop: "1.5rem" }}>
+      <div className='viz-wrapper'>
         {VizComponent ? (
           <VizComponent />
         ) : (
-          <div
-            style={{
-              width: "100%",
-              height: "500px",
-              background: "#f0f0f0",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              borderRadius: "8px",
-              color: "#999",
-            }}
-          >
+          <div className='viz-placeholder'>
             Visualization placeholder
           </div>
         )}

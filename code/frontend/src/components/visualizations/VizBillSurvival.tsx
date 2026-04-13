@@ -114,7 +114,7 @@ export default function VizBillSurvival() {
   }, [data]);
 
   if (loading) return <p>Loading...</p>;
-  if (error) return <p style={{ color: "red" }}>{error}</p>;
+  if (error) return <p>{error}</p>;
 
   return (
     <div>
