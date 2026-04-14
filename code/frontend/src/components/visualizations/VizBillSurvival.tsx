@@ -1,124 +1,169 @@
 import { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
+import "./VizBillSurvival.css";
+
 
 const API_BASE = "http://localhost:5000";
 
-interface Stage {
-  label: string;
-  count: number;
-}
+interface Stage { label: string; count: number; }
+type FunnelData = Record<string, Stage[]>;
+
+const MARGIN = { top: 40, right: 40, bottom: 60, left: 80 };
+const W = 800 - MARGIN.left - MARGIN.right;
+const H = 500 - MARGIN.top - MARGIN.bottom;
 
 export default function VizBillSurvival() {
-  const svgRef = useRef<SVGSVGElement>(null);
-  const [data, setData] = useState<Stage[]>([]);
+  const svgRef    = useRef<SVGSVGElement>(null);
+  const allData   = useRef<FunnelData>({});       // cache — never triggers re-render
+  const [keys, setKeys]       = useState<string[]>([]);
+  const [selected, setSelected] = useState("All");
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError]     = useState<string | null>(null);
 
+  // ── 1. Fetch everything ONCE ──────────────────────────────────
   useEffect(() => {
     fetch(`${API_BASE}/api/visualizations/bill_funnel`)
       .then((r) => r.json())
-      .then((json) => {
-        setData(json.stages);
+      .then((json: FunnelData) => {
+        allData.current = json;
+        setKeys(Object.keys(json));   // triggers dropdown render
         setLoading(false);
       })
-      .catch(() => {
-        setError("Failed to load data.");
-        setLoading(false);
-      });
+      .catch(() => { setError("Failed to load data."); setLoading(false); });
   }, []);
 
+  // ── 2. Build chart skeleton once data arrives ─────────────────
   useEffect(() => {
-    if (!data.length || !svgRef.current) return;
+    if (!keys.length || !svgRef.current) return;
 
-    const margin = { top: 20, right: 20, bottom: 60, left: 70 };
-    const width = 640 - margin.left - margin.right;
-    const height = 400 - margin.top - margin.bottom;
+    const svg = d3.select(svgRef.current)
+      .attr("width",  W + MARGIN.left + MARGIN.right)
+      .attr("height", H + MARGIN.top  + MARGIN.bottom);
 
-    // Clear previous render
-    d3.select(svgRef.current).selectAll("*").remove();
+    const g = svg.append("g")
+      .attr("class", "chart-root")
+      .attr("transform", `translate(${MARGIN.left},${MARGIN.top})`);
 
-    const svg = d3
-      .select(svgRef.current)
-      .attr("width", width + margin.left + margin.right)
-      .attr("height", height + margin.top + margin.bottom)
-      .append("g")
-      .attr("transform", `translate(${margin.left},${margin.top})`);
-
-    const x = d3
-      .scaleBand()
-      .domain(data.map((d) => d.label))
-      .range([0, width])
-      .padding(0.3);
-
-    const y = d3
-      .scaleLinear()
-      .domain([0, d3.max(data, (d) => d.count) ?? 0])
-      .nice()
-      .range([height, 0]);
-
-    // Color: fade from dark blue to light as count drops
-    const colorScale = d3
-      .scaleSequential()
-      .domain([0, data.length - 1])
-      .interpolator(d3.interpolateBlues);
-
-    // Bars
-    svg
-      .selectAll("rect")
-      .data(data)
-      .join("rect")
-      .attr("x", (d) => x(d.label) ?? 0)
-      .attr("y", (d) => y(d.count))
-      .attr("width", x.bandwidth())
-      .attr("height", (d) => height - y(d.count))
-      .attr("fill", (_, i) => colorScale(data.length - 1 - i))
-      .attr("rx", 3);
-
-    // Value labels on top of bars
-    svg
-      .selectAll(".bar-label")
-      .data(data)
-      .join("text")
-      .attr("class", "bar-label")
-      .attr("x", (d) => (x(d.label) ?? 0) + x.bandwidth() / 2)
-      .attr("y", (d) => y(d.count) - 6)
+    // Static axes groups (content filled on each update)
+    g.append("g").attr("class", "x-axis").attr("transform", `translate(0,${H})`);
+    g.append("g").attr("class", "y-axis");
+    g.append("text")
+      .attr("class", "y-label")
+      .attr("transform", "rotate(-90)")
+      .attr("x", -H / 2).attr("y", -65)
       .attr("text-anchor", "middle")
-      .attr("font-size", "12px")
-      .attr("fill", "#333")
-      .text((d) => d.count.toLocaleString());
+      .attr("font-size", "14px")
+      .attr("font-weight", "bold")
+      .attr("fill", "#E6677F")
+      .text("Number of Bills");
 
-    // X axis
-    svg
-      .append("g")
-      .attr("transform", `translate(0,${height})`)
+    // Trigger first render with "All"
+    updateChart("All");
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [keys]);
+
+  // ── 3. Pure D3 update (no React state touched) ────────────────
+  function updateChart(key: string) {
+    const data = allData.current[key];
+    if (!data || !svgRef.current) return;
+
+    const g = d3.select(svgRef.current).select<SVGGElement>("g.chart-root");
+
+    const x = d3.scaleBand()
+      .domain(data.map((d) => d.label))
+      .range([0, W]).padding(0.3);
+
+    const y = d3.scaleLinear()
+      .domain([0, d3.max(data, (d) => d.count) ?? 0])
+      .nice().range([H, 0]);
+
+    const color = d3.scaleSequential()
+      .domain([0, data.length - 1])
+      .interpolator(d3.interpolateRgb("#FFB3C1", "#E6677F"));
+
+    // Axes
+    g.select<SVGGElement>(".x-axis")
+      .transition().duration(400)
       .call(d3.axisBottom(x))
       .selectAll("text")
       .attr("dy", "1.2em")
-      .style("font-size", "12px");
+      .style("font-size", "14px");
 
-    // Y axis
-    svg
-      .append("g")
-      .call(d3.axisLeft(y).ticks(6).tickFormat(d3.format(",d")));
+    g.select<SVGGElement>(".y-axis")
+      .transition().duration(400)
+      .call(d3.axisLeft(y).ticks(6).tickFormat(d3.format(",d")))
+      .selectAll("text")
+      .style("font-size", "14px");
 
-    // Y axis label
-    svg
-      .append("text")
-      .attr("transform", "rotate(-90)")
-      .attr("x", -height / 2)
-      .attr("y", -55)
-      .attr("text-anchor", "middle")
-      .attr("font-size", "12px")
-      .attr("fill", "#555")
-      .text("Number of Bills");
-  }, [data]);
+    // Bars
+    g.selectAll<SVGRectElement, Stage>("rect.bar")
+      .data(data, (d) => d.label)
+      .join(
+        (enter) => enter.append("rect").attr("class", "bar")
+          .attr("rx", 3)
+          .attr("x", (d) => x(d.label) ?? 0)
+          .attr("width", x.bandwidth())
+          .attr("y", H).attr("height", 0),   // animate up from baseline
+        (update) => update,
+        (exit)   => exit.transition().duration(300)
+          .attr("y", H).attr("height", 0).remove()
+      )
+      .attr("fill", (_, i) => color(data.length - 1 - i))
+      .transition().duration(600).ease(d3.easeCubicOut)
+        .attr("x", (d) => x(d.label) ?? 0)
+        .attr("width", x.bandwidth())
+        .attr("y", (d) => y(d.count))
+        .attr("height", (d) => H - y(d.count));
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>{error}</p>;
+    // Value labels
+    g.selectAll<SVGTextElement, Stage>("text.bar-label")
+      .data(data, (d) => d.label)
+      .join(
+        (enter) => enter.append("text").attr("class", "bar-label")
+          .attr("text-anchor", "middle")
+          .attr("font-size", "14px").attr("fill", "#333")
+          .attr("x", (d) => (x(d.label) ?? 0) + x.bandwidth() / 2)
+          .attr("y", H - 6).text("0"),
+        (update) => update,
+        (exit)   => exit.remove()
+      )
+      .transition().duration(600).ease(d3.easeCubicOut)
+        .attr("x", (d) => (x(d.label) ?? 0) + x.bandwidth() / 2)
+        .attr("y", (d) => y(d.count) - 6)
+        .tween("text", function (d) {
+          const prev = parseInt(this.textContent?.replace(/,/g, "") || "0", 10);
+          const interp = d3.interpolateNumber(prev, d.count);
+          return (t) => { this.textContent = Math.round(interp(t)).toLocaleString(); };
+        });
+  }
+
+  // ── 4. On dropdown change — D3 only, zero React re-renders ───
+  function handleSelect(e: React.ChangeEvent<HTMLSelectElement>) {
+    const key = e.target.value;
+    setSelected(key);   // only to keep <select> controlled
+    updateChart(key);
+  }
+
+  if (error)   return <p>{error}</p>;
+  if (loading) return <p>Loading…</p>;
 
   return (
-    <div>
-      <svg ref={svgRef} />
+    <div className='funnel-container'>
+      <div className='filter-container'>
+        <label htmlFor="policy-select">
+          Policy Area:
+        </label>
+        <select
+          id="policy-select"
+          value={selected}
+          onChange={handleSelect}
+        >
+          {keys.map((k) => <option key={k} value={k}>{k}</option>)}
+        </select>
+      </div>
+      <div className="chart-container">
+        <svg ref={svgRef} />
+      </div>
     </div>
   );
 }

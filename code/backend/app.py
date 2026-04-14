@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from sqlalchemy.orm import joinedload, contains_eager
@@ -265,54 +265,54 @@ def get_bipartisanship():
 
 
 @app.route('/api/visualizations/bill_funnel')
-def get_bill_funnel():
-    """
-    Returns bill counts at each stage of the legislative funnel.
-    No filters — static aggregate, client can display as-is.
-    """
-    total_introduced = BillModel.query.count()
-
-    voted_on = (
-        db.session.query(func.count(distinct(VoteModel.bill_id)))
-        .filter(VoteModel.bill_id.isnot(None))
-        .scalar()
+def get_bill_funnel_all():
+    pass_result_filter = or_(
+        *(VoteModel.result.ilike(f'%{r}%') for r in ["Passed"])
     )
 
-    PASS_RESULTS = ["Passed", "Agreed to"]
-    pass_result_filter = or_(*[VoteModel.result.ilike(f'%{r}%') for r in PASS_RESULTS])
+    # Get all distinct policy areas (+ None bucket for "All")
+    policy_areas = [r.policy_area for r in (
+        db.session.query(BillModel.policy_area)
+        .filter(BillModel.policy_area.isnot(None))
+        .distinct().order_by(BillModel.policy_area).all()
+    )]
 
-    passed_one = (
-        db.session.query(func.count(distinct(VoteModel.bill_id)))
-        .filter(pass_result_filter)
-        .scalar()
-    )
+    def get_stages(bill_ids_subq):
+        introduced = db.session.query(func.count()).select_from(bill_ids_subq).scalar()
+        voted_on = (
+            db.session.query(func.count(distinct(VoteModel.bill_id)))
+            .filter(VoteModel.bill_id.in_(bill_ids_subq))
+            .scalar()
+        )
+        passed_one = (
+            db.session.query(func.count(distinct(VoteModel.bill_id)))
+            .filter(VoteModel.bill_id.in_(bill_ids_subq))
+            .filter(pass_result_filter)
+            .scalar()
+        )
+        became_law = (
+            db.session.query(func.count(distinct(LawModel.bill_id)))
+            .filter(LawModel.bill_id.in_(bill_ids_subq))
+            .scalar()
+        )
+        return [
+            {'label': 'Introduced',         'count': introduced},
+            {'label': 'Voted On',           'count': voted_on},
+            {'label': 'Passed One Chamber', 'count': passed_one},
+            {'label': 'Became Law',         'count': became_law},
+        ]
 
-    h_passed = (
-        db.session.query(VoteModel.bill_id)
-        .filter(pass_result_filter, VoteModel.chamber == 'H')
-        .distinct().subquery()
-    )
-    s_passed = (
-        db.session.query(VoteModel.bill_id)
-        .filter(pass_result_filter, VoteModel.chamber == 'S')
-        .distinct().subquery()
-    )
-    passed_both = (
-        db.session.query(func.count())
-        .select_from(h_passed)
-        .join(s_passed, h_passed.c.bill_id == s_passed.c.bill_id)
-        .scalar()
-    )
+    result = {'All': get_stages(db.session.query(BillModel.bill_id).subquery())}
 
-    became_law = db.session.query(func.count(distinct(LawModel.bill_id))).scalar()
+    for area in policy_areas:
+        subq = (
+            db.session.query(BillModel.bill_id)
+            .filter(BillModel.policy_area == area)
+            .subquery()
+        )
+        result[area] = get_stages(subq)
 
-    return jsonify({'stages': [
-        {'label': 'Introduced',         'count': total_introduced},
-        {'label': 'Voted On',           'count': voted_on},
-        {'label': 'Passed One Chamber', 'count': passed_one},
-        {'label': 'Passed Both',        'count': passed_both},
-        {'label': 'Became Law',         'count': became_law},
-    ]})
+    return jsonify(result)
 
 
 @app.route('/api/visualizations/activity_over_time')

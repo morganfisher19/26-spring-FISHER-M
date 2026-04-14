@@ -10,7 +10,7 @@ export const VISUALIZATIONS = [
   {
     id: "bill-survival",
     title: "How a Bill Survives Congress",
-    description: "Placeholder description",
+    description: "How many bills actually become law?",
   },
   {
     id: "activity-over-time",
