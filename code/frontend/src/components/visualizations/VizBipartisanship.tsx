@@ -239,9 +239,6 @@ export default function VizBipartisanship() {
 
   return (
     <div className='bipartisan-container'>
-      <div className='text-container'>
-        <p>A vote is "bipartisan" when both parties voted the same way (both majority yes or both majority no).</p>
-      </div>
       {/* Filters */}
       <div className='filter-container'>
         <div className='chamber-filter-container'>
@@ -278,6 +275,9 @@ export default function VizBipartisanship() {
           <svg ref={svgRef} />
         </div>
       )}
+      <div className='text-container'>
+        <p>A vote is "bipartisan" when both parties voted the same way (both majority yes or both majority no).</p>
+      </div>
     </div>
   );
 }

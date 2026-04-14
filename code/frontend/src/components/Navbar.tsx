@@ -2,16 +2,17 @@ import { Link, useLocation } from "react-router-dom";
 import { useRef } from "react";
 import "./Navbar.css";
 
+const VIZ_LINKS = [
+  { label: "Bipartisanship In Congress", path: "/visualizations/bipartisanship" },
+  { label: "Bill Survival", path: "/visualizations/bill-survival" },
+  { label: "Congressional Activity", path: "/visualizations/activity-over-time" },
+  { label: "Bill Activity", path: "/visualizations/top-influencers" },
+];
+
 export default function Navbar() {
   const { pathname } = useLocation();
   const flowerContainerRef = useRef<HTMLDivElement>(null);
-
-  const links = [
-    { label: "Home", path: "/" },
-    // { label: "About", path: "/about" },
-    // { label: "Data Visualizations", path: "/visualizations" },
-  ];
-
+  const dropdownRef = useRef<HTMLLIElement>(null);
 
   const handleFlowerRain = () => {
     if (!flowerContainerRef.current) return;
@@ -72,7 +73,7 @@ export default function Navbar() {
     <>
       <nav className="navbar">
         <div className="navbar-brand">
-          Member Monitor
+          <Link to="/" className="brand-link">Member Monitor</Link>
           <img
             src="../../images/flower-3.png"
             alt="flower"
@@ -81,13 +82,23 @@ export default function Navbar() {
           />
           </div>
         <ul className="navbar-links">
-          {links.map(({ label, path }) => (
-            <li key={path}>
-              <Link to={path} className={pathname === path ? "active" : ""}>
-                {label}
-              </Link>
-            </li>
-          ))}  
+          <li>
+            <Link to="/" className={pathname === "/" ? "active" : ""}>
+              Home
+            </Link>
+          </li>
+          <li ref={dropdownRef} className="dropdown-wrapper">
+            <div className="dropdown">
+              <button className="dropbtn">Data Visualizations</button>
+              <div className="dropdown-content">
+                {VIZ_LINKS.map((link, index) => (
+                  <a key={index} href={link.path}>
+                    {link.label}
+                  </a>
+                ))}
+              </div>
+            </div>
+          </li>
         </ul>
       </nav>
 

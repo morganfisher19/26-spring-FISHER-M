@@ -4,7 +4,7 @@ import "./VizGallery.css";
 export const VISUALIZATIONS = [
     {
     id: "bipartisanship",
-    title: "Bipartisanship Within Congress",
+    title: "Bipartisanship In Congress",
     description: "How often do the parties agree with one another?",
   },
   {

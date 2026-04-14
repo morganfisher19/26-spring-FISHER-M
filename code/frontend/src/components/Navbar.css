@@ -18,6 +18,14 @@
   font-weight: 700;
   letter-spacing: 0.05em;
   color: white !important;
+  display: flex;
+  align-items: center;
+}
+
+/* Brand as link */
+.brand-link {
+  color: white !important;
+  text-decoration: none;
 }
 
 .navbar-links {
@@ -26,6 +34,7 @@
   gap: 2rem;
   margin: 0;
   padding: 0;
+  align-items: center;
 }
 
 .navbar-links a {
@@ -35,11 +44,66 @@
   transition: color 0.2s;
 }
 
-.navbar-links a:hover {
+.navbar-links a:hover,
+.navbar-links a.active {
   color: white;
   border-bottom: 2px solid white;
   padding-bottom: 2px;
 }
+
+/* Dropdown */
+.dropdown-wrapper {
+  position: relative;
+}
+
+/* Dropdown Button */
+.dropbtn {
+  height: auto;
+  width: auto;
+  border-radius: 0 !important;
+  background-color: #FFB3C1;
+  color: white;
+  padding: 0px;
+  font-size: 1.1rem;;
+  border: none;
+}
+
+.dropbtn:hover {
+  background-color: #FFB3C1 !important;
+  border-bottom: 2px solid white;
+}
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #FFB3C1;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+
+/* Links inside the dropdown */
+.dropdown-content a {
+  color: white;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+/* Change color of dropdown links on hover */
+.dropdown-content a:hover {
+  color: #E6677F;
+  border-bottom: 0px solid transparent;
+  padding: 12px 16px;
+}
+
+/* Show the dropdown menu on hover */
+.dropdown:hover .dropdown-content {display: block;}
 
 /* flower icon in navbar */
 .flower-icon {
