@@ -15,11 +15,11 @@ export const VISUALIZATIONS = [
   {
     id: "activity-over-time",
     title: "Congressional Activity Over Time",
-    description: "Placeholder description",
+    description: "When are members voting the most?",
   },
   { id: "top-influencers",
     title: "Top Influencers in Congress",
-    description: "Placeholder description"
+    description: "Which members have the most influence in Congress?"
   },
 
 ];
