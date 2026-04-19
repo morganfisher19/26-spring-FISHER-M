@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
-import "./VizBipartisanship.css";
+import "./VizAll.css";
 
 interface PartyTotal {
   party: string;
@@ -46,7 +46,7 @@ function classifyVotes(votes: VoteData[]): BarData[] {
   }
 
   return [
-    { label: "Bipartisan", count: agree,    color: "#6B7280" },
+    { label: "Bipartisan", count: agree,    color: "#A8C3A0" },
     { label: "Partisan",   count: disagree, color: "#E6677F" },
   ];
 }
@@ -122,7 +122,7 @@ export default function VizBipartisanship() {
         .attr("text-anchor", "middle")
         .style("font-size", "14px")
         .style("font-weight", "bold")
-        .style("fill", "#E6677F")
+        .style("fill", "#6B3A3A")
         .text("Number of Votes");
 
       g.append("g").attr("id", "bars");
@@ -148,7 +148,12 @@ export default function VizBipartisanship() {
       .call(d3.axisBottom(x))
       .selectAll("text")
       .style("font-size", "14px")
-      .style("font-weight", "bold");
+      .style("fill", "#6B3A3A")
+      .style("font-weight", "normal");
+    
+    g.select<SVGGElement>("#x-axis")
+      .selectAll("line, path")
+      .style("stroke", "#6B3A3A");
 
     g.select<SVGGElement>("#y-axis")
       .transition(t)
@@ -158,7 +163,13 @@ export default function VizBipartisanship() {
           .tickFormat(d3.format("d"))  // integers only
       )
       .selectAll("text")
-      .style("font-size", "14px");  // adjust size to taste
+      .style("font-size", "14px")
+      .style("fill", "#6B3A3A")
+      .style("font-weight", "normal");
+
+    g.select<SVGGElement>("#y-axis")
+      .selectAll("line, path")
+      .style("stroke", "#6B3A3A");
 
     // Bars
     g.select("#bars")
@@ -208,7 +219,7 @@ export default function VizBipartisanship() {
             .attr("text-anchor",  "middle")
             .style("font-size",   "14px")
             .style("font-weight", "bold")
-            .style("fill",        "#333")
+            .style("fill",        "#6B3A3A")
             .text((d) => `${d.count} (${total ? ((d.count / total) * 100).toFixed(1) : 0}%)`)
             .call((e) => e.transition(t).attr("y", (d) => y(d.count) - 8)),
         (update) =>
@@ -241,7 +252,7 @@ export default function VizBipartisanship() {
     <div className='bipartisan-container'>
       {/* Filters */}
       <div className='filter-container'>
-        <div className='chamber-filter-container'>
+        <div className='single-filter-container'>
           <label>Chamber:</label>
           <select
             value={chamber}
@@ -252,8 +263,7 @@ export default function VizBipartisanship() {
             <option value="S">Senate</option>
           </select>
         </div>
-
-        <div className='policy-filter-container'>
+        <div className='single-filter-container'>
           <label>Policy Area:</label>
           <select
             value={policyArea}

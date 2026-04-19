@@ -1,0 +1,76 @@
+
+.filter-container {
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.single-filter-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.filter-container label {
+  font-weight: 500;
+  color: #6B3A3A;
+}
+
+.filter-container select {
+  appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+
+    background-color: #DDEBDD; /* leaf green */
+    color: #6B3A3A;
+
+    border: 2px solid #6B3A3A; /* trunk brown */
+    border-radius: 10px;
+
+    padding: 2px 36px 2px 12px;
+    font-size: 14px;
+
+    cursor: pointer;
+
+    box-shadow: 0 3px 6px rgba(107, 58, 58, 0.2);
+    transition: all 0.2s ease;
+}
+
+.filter-container select:hover {
+    background-color: #D3E6D0;
+}
+
+.filter-container select:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(168, 195, 160, 0.6);
+}
+
+
+.filter-container select {
+    background-image: url("data:image/svg+xml;utf8,<svg fill='%236B3A3A' height='18' viewBox='0 0 24 24' width='18' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+}
+
+
+.chart-container {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+/* Bottom text */
+.text-container {
+  width: 100%;
+  text-align: center;
+}
+
+.text-container p {
+    width: auto;
+    font-size: 1rem !important;
+    padding-bottom: 1.5rem;
+}

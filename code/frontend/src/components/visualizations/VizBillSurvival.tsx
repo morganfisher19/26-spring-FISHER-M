@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
-import "./VizBillSurvival.css";
+import "./VizAll.css";
 
 
 const API_BASE = "http://localhost:5000";
@@ -54,7 +54,7 @@ export default function VizBillSurvival() {
       .attr("text-anchor", "middle")
       .attr("font-size", "14px")
       .attr("font-weight", "bold")
-      .attr("fill", "#E6677F")
+      .attr("fill", "#6B3A3A")
       .text("Number of Bills");
 
     // Trigger first render with "All"
@@ -87,13 +87,21 @@ export default function VizBillSurvival() {
       .call(d3.axisBottom(x))
       .selectAll("text")
       .attr("dy", "1.2em")
-      .style("font-size", "14px");
+      .style("font-size", "14px")
+      .style("fill", "#6B3A3A");
+    g.select<SVGGElement>(".x-axis")
+      .selectAll("line, path")
+      .style("stroke", "#6B3A3A");
 
     g.select<SVGGElement>(".y-axis")
       .transition().duration(400)
       .call(d3.axisLeft(y).ticks(6).tickFormat(d3.format(",d")))
       .selectAll("text")
-      .style("font-size", "14px");
+      .style("font-size", "14px")
+      .style("fill", "#6B3A3A");
+    g.select<SVGGElement>(".y-axis")
+      .selectAll("line, path")
+      .style("stroke", "#6B3A3A");
 
     // Bars
     g.selectAll<SVGRectElement, Stage>("rect.bar")
@@ -121,7 +129,7 @@ export default function VizBillSurvival() {
       .join(
         (enter) => enter.append("text").attr("class", "bar-label")
           .attr("text-anchor", "middle")
-          .attr("font-size", "14px").attr("fill", "#333")
+          .attr("font-size", "14px").attr("fill", "#6B3A3A")
           .attr("x", (d) => (x(d.label) ?? 0) + x.bandwidth() / 2)
           .attr("y", H - 6).text("0"),
         (update) => update,
