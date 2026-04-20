@@ -393,7 +393,7 @@ def get_top_influencers():
         'policy_area':     r.policy_area,
         'bills_sponsored': r.bills_sponsored,
         'laws_passed':     r.laws_passed,
-        'total_cosponsors':r.total_cosponsors,
+        'total_cosponsors': int(r.total_cosponsors),
     } for r in rows])
 
 
