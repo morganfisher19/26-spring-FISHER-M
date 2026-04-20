@@ -1,9 +1,25 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import * as d3 from "d3";
+import "./VizAll.css";
 
 const API_BASE = "http://localhost:5000";
 
-interface Member {
+// Shape returned by /api/visualizations/top_influencers
+interface RawRow {
+  member_id: string;
+  full_name: string;
+  party: string;
+  chamber: string;
+  state_name: string;
+  policy_area: string | null;
+  bills_sponsored: number;
+  laws_passed: number;
+  total_cosponsors: number;
+}
+
+// One bar = one member (aggregated across policy areas after client-side filter)
+interface MemberBar {
   member_id: string;
   full_name: string;
   party: string;
@@ -12,193 +28,268 @@ interface Member {
   score: number;
 }
 
-type Metric = "laws" | "sponsored" | "cosponsors";
+type Metric  = "laws_passed" | "bills_sponsored" | "total_cosponsors";
 type Chamber = "" | "H" | "S";
-type Party = "" | "D" | "R";
+type Party   = "" | "D" | "R";
 
 const METRIC_LABELS: Record<Metric, string> = {
-  laws: "Laws Passed",
-  sponsored: "Bills Sponsored",
-  cosponsors: "Cosponsors Attracted",
+  laws_passed:      "Laws Passed",
+  bills_sponsored:  "Bills Sponsored",
+  total_cosponsors: "Cosponsors Attracted",
 };
 
 const PARTY_COLORS: Record<string, string> = {
-  D: "#2563eb",
-  R: "#dc2626",
+  D: "#4A7FCF",
+  R: "#C65A5A",
   I: "#6b7280",
 };
 
+const BROWN = "#6B3A3A";
+
+const TOP_N = 10;
+
 export default function VizTopInfluencers() {
   const svgRef = useRef<SVGSVGElement>(null);
-  const [data, setData] = useState<Member[]>([]);
+
+  const [raw, setRaw]           = useState<RawRow[]>([]);
   const [policyAreas, setPolicyAreas] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading]   = useState(true);
+  const [error, setError]       = useState<string | null>(null);
 
-  const [metric, setMetric] = useState<Metric>("laws");
-  const [chamber, setChamber] = useState<Chamber>("");
-  const [party, setParty] = useState<Party>("");
+  const [metric, setMetric]         = useState<Metric>("laws_passed");
+  const [chamber, setChamber]       = useState<Chamber>("");
+  const [party, setParty]           = useState<Party>("");
   const [policyArea, setPolicyArea] = useState("");
+  const navigate = useNavigate();
 
-  // Load policy areas once
+  // Fetch all data once
   useEffect(() => {
-    fetch(`${API_BASE}/api/policy_areas`)
-      .then((r) => r.json())
-      .then(setPolicyAreas)
-      .catch(() => {});
-  }, []);
-
-  // Reload when filters change
-  useEffect(() => {
-    setLoading(true);
-    const params = new URLSearchParams({ metric, limit: "10" });
-    if (chamber) params.set("chamber", chamber);
-    if (party) params.set("party", party);
-    if (policyArea) params.set("policy_area", policyArea);
-
-    fetch(`${API_BASE}/api/visualizations/top_influencers?${params}`)
-      .then((r) => r.json())
-      .then((json) => {
-        setData(json.data);
+    Promise.all([
+      fetch(`${API_BASE}/api/visualizations/top_influencers`).then(r => r.json()),
+      fetch(`${API_BASE}/api/policy_areas`).then(r => r.json()),
+    ])
+      .then(([rows, areas]: [RawRow[], string[]]) => {
+        setRaw(rows);
+        setPolicyAreas(areas);
         setLoading(false);
       })
       .catch(() => {
         setError("Failed to load data.");
         setLoading(false);
       });
-  }, [metric, chamber, party, policyArea]);
+  }, []);
 
-  // Draw chart
+  // Client-side filter + aggregate + rank
+  const chartData = useMemo<MemberBar[]>(() => {
+    const filtered = raw.filter(r =>
+      (chamber     === "" || r.chamber     === chamber) &&
+      (party       === "" || r.party       === party)   &&
+      (policyArea  === "" || r.policy_area === policyArea)
+    );
+
+    // Aggregate per member (multiple rows when grouping by policy_area on backend)
+    const byMember = new Map<string, MemberBar>();
+    for (const r of filtered) {
+      const existing = byMember.get(r.member_id);
+      if (existing) {
+        existing.score +=
+          metric === "laws_passed"      ? r.laws_passed      :
+          metric === "bills_sponsored"  ? r.bills_sponsored  :
+          r.total_cosponsors;
+      } else {
+        byMember.set(r.member_id, {
+          member_id: r.member_id,
+          full_name: r.full_name,
+          party:     r.party,
+          chamber:   r.chamber,
+          state_name:r.state_name,
+          score:
+            metric === "laws_passed"      ? r.laws_passed      :
+            metric === "bills_sponsored"  ? r.bills_sponsored  :
+            r.total_cosponsors,
+        });
+      }
+    }
+
+    return Array.from(byMember.values())
+      .filter(d => d.score > 0) 
+      .sort((a, b) => b.score - a.score)
+      .slice(0, TOP_N);
+  }, [raw, metric, chamber, party, policyArea]);
+
+  // D3 chart with transitions
   useEffect(() => {
-    if (!data.length || !svgRef.current) return;
+    if (!svgRef.current) return;
 
-    const margin = { top: 10, right: 60, bottom: 40, left: 180 };
-    const width = 640 - margin.left - margin.right;
-    const barHeight = 32;
-    const height = data.length * barHeight;
+    const margin     = { top: 16, right: 64, bottom: 48, left: 190 };
+    const totalWidth = 660;
+    const barHeight  = 36;
+    const height     = TOP_N * barHeight;
+    const width      = totalWidth - margin.left - margin.right;
+    const DURATION   = 500;
 
-    d3.select(svgRef.current).selectAll("*").remove();
+    const svgEl = d3.select(svgRef.current);
 
-    const svg = d3
-      .select(svgRef.current)
-      .attr("width", width + margin.left + margin.right)
-      .attr("height", height + margin.top + margin.bottom)
-      .append("g")
-      .attr("transform", `translate(${margin.left},${margin.top})`);
+    // One-time SVG setup
+    if (svgEl.select("g.root").empty()) {
+      svgEl
+        .attr("width",  totalWidth)
+        .attr("height", height + margin.top + margin.bottom);
 
-    // Sorted descending — top member at top
-    const sorted = [...data].sort((a, b) => b.score - a.score);
+      const root = svgEl.append("g")
+        .attr("class", "root")
+        .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    const y = d3
-      .scaleBand()
-      .domain(sorted.map((d) => d.member_id))
+      root.append("g").attr("class", "x-axis")
+        .attr("transform", `translate(0,${height})`);
+      root.append("g").attr("class", "y-axis");
+      root.append("g").attr("class", "bars");
+      root.append("g").attr("class", "score-labels");
+      root.append("text").attr("class", "x-label")
+        .attr("x", width / 2)
+        .attr("y", height + 42)
+        .attr("text-anchor", "middle")
+        .attr("font-size", "12px")
+        .attr("fill", BROWN);
+    }
+
+    const root = svgEl.select<SVGGElement>("g.root");
+
+    // Scales
+    const y = d3.scaleBand()
+      .domain(chartData.map(d => d.member_id))
       .range([0, height])
-      .padding(0.25);
+      .padding(0.28);
 
-    const x = d3
-      .scaleLinear()
-      .domain([0, d3.max(sorted, (d) => d.score) ?? 0])
+    const x = d3.scaleLinear()
+      .domain([0, d3.max(chartData, d => d.score) ?? 1])
       .nice()
       .range([0, width]);
 
-    // Bars
-    svg
-      .selectAll("rect")
-      .data(sorted)
-      .join("rect")
-      .attr("y", (d) => y(d.member_id) ?? 0)
-      .attr("x", 0)
-      .attr("height", y.bandwidth())
-      .attr("width", (d) => x(d.score))
-      .attr("fill", (d) => PARTY_COLORS[d.party] ?? "#6b7280")
-      .attr("rx", 3);
-
-    // Score labels
-    svg
-      .selectAll(".score-label")
-      .data(sorted)
-      .join("text")
-      .attr("class", "score-label")
-      .attr("y", (d) => (y(d.member_id) ?? 0) + y.bandwidth() / 2)
-      .attr("x", (d) => x(d.score) + 6)
-      .attr("dominant-baseline", "middle")
-      .attr("font-size", "12px")
-      .attr("fill", "#333")
-      .text((d) => d.score.toLocaleString());
-
-    // Y axis — member names
-    const yAxis = d3
-      .axisLeft(y)
-      .tickFormat((memberId) => {
-        const m = sorted.find((d) => d.member_id === memberId);
-        return m ? m.full_name : memberId;
+    // X axis
+    root.select<SVGGElement>(".x-axis")
+      .transition().duration(DURATION)
+      .call(
+        d3.axisBottom(x)
+          .ticks(Math.min(5, d3.max(chartData, d => d.score) ?? 1))
+          .tickFormat(d3.format(",d")) as any
+      )
+      .call(g => {
+        g.selectAll("text").attr("fill", BROWN).attr("font-size", "11px");
+        g.selectAll("line, path").attr("stroke", BROWN);
       });
 
-    svg
-      .append("g")
-      .call(yAxis)
-      .selectAll("text")
-      .style("font-size", "12px");
+    // Y axis
+    root.select<SVGGElement>(".y-axis")
+      .transition().duration(DURATION)
+      .call(
+        d3.axisLeft(y).tickFormat(memberId => {
+          const m = chartData.find(d => d.member_id === memberId);
+          return m ? m.full_name : String(memberId);
+        }) as any
+      )
+      .call(g => {
+        g.selectAll("text").attr("fill", BROWN).attr("font-size", "12px");
+        g.selectAll("line, path").attr("stroke", BROWN);
+      });
 
-    // X axis
-    svg
-      .append("g")
-      .attr("transform", `translate(0,${height})`)
-      .call(d3.axisBottom(x).ticks(5).tickFormat(d3.format(",d")));
+    // Bars
+    const bars = root.select(".bars")
+      .selectAll<SVGRectElement, MemberBar>("rect")
+      .data(chartData, d => d.member_id);
 
-    // X label
-    svg
+    bars.enter()
+      .append("rect")
+      .attr("y",      d => y(d.member_id) ?? 0)
+      .attr("x",      0)
+      .attr("height", y.bandwidth())
+      .attr("width",  0)
+      .attr("fill",   d => PARTY_COLORS[d.party] ?? "#6b7280")
+      .attr("rx",     3)
+      .style("cursor", "pointer")
+      .on("click", (event, d) => navigate(`/member/${d.member_id}`))
+      .merge(bars as any)
+      .transition().duration(DURATION)
+      .attr("y",      d => y(d.member_id) ?? 0)
+      .attr("height", y.bandwidth())
+      .attr("width",  d => x(d.score))
+      .attr("fill",   d => PARTY_COLORS[d.party] ?? "#6b7280");
+
+    bars.exit()
+      .transition().duration(DURATION)
+      .attr("width", 0)
+      .remove();
+
+    // Score labels
+    const labels = root.select(".score-labels")
+      .selectAll<SVGTextElement, MemberBar>("text")
+      .data(chartData, d => d.member_id);
+
+    labels.enter()
       .append("text")
-      .attr("x", width / 2)
-      .attr("y", height + 36)
-      .attr("text-anchor", "middle")
-      .attr("font-size", "12px")
-      .attr("fill", "#555")
+      .attr("y",                d => (y(d.member_id) ?? 0) + y.bandwidth() / 2)
+      .attr("x",                d => x(d.score) + 6)
+      .attr("dominant-baseline","middle")
+      .attr("font-size",        "11px")
+      .attr("fill",             BROWN)
+      .attr("opacity",          0)
+      .text(d => d.score.toLocaleString())
+      .merge(labels as any)
+      .transition().duration(DURATION)
+      .attr("y",       d => (y(d.member_id) ?? 0) + y.bandwidth() / 2)
+      .attr("x",       d => x(d.score) + 6)
+      .attr("opacity", 1)
+      .text(d => d.score.toLocaleString());
+
+    labels.exit()
+      .transition().duration(DURATION)
+      .attr("opacity", 0)
+      .remove();
+
+    // X axis label
+    root.select(".x-label")
+      .transition().duration(DURATION)
       .text(METRIC_LABELS[metric]);
-  }, [data, metric]);
+
+  }, [chartData, metric, navigate]);
 
   return (
-    <div>
+    <div className="influencer-container">
       {/* Metric toggle */}
-      <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1rem" }}>
-        {(["laws", "sponsored", "cosponsors"] as Metric[]).map((m) => (
+      <div className="chart-toggle">
+        {(Object.keys(METRIC_LABELS) as Metric[]).map(m => (
           <button
             key={m}
             onClick={() => setMetric(m)}
-            style={{
-              ...btnStyle,
-              background: metric === m ? "#1e40af" : "#e5e7eb",
-              color: metric === m ? "#fff" : "#333",
-            }}
+            className={metric === m ? "toggleBtn active" : "toggleBtn"}
           >
             {METRIC_LABELS[m]}
           </button>
         ))}
       </div>
-
       {/* Filters */}
-      <div style={{ display: "flex", gap: "1.5rem", marginBottom: "1.25rem", flexWrap: "wrap" }}>
-        <div>
-          <label style={labelStyle}>Chamber</label>
-          <select value={chamber} onChange={(e) => setChamber(e.target.value as Chamber)} style={selectStyle}>
+      <div className='filter-container'>
+        <div className='single-filter-container'>
+          <label>Chamber</label>
+          <select value={chamber} onChange={e => setChamber(e.target.value as Chamber)}>
             <option value="">All</option>
             <option value="H">House</option>
             <option value="S">Senate</option>
           </select>
         </div>
-        <div>
-          <label style={labelStyle}>Party</label>
-          <select value={party} onChange={(e) => setParty(e.target.value as Party)} style={selectStyle}>
+        <div className='single-filter-container'>
+          <label>Party</label>
+          <select value={party} onChange={e => setParty(e.target.value as Party)}>
             <option value="">All</option>
             <option value="D">Democrat</option>
             <option value="R">Republican</option>
           </select>
         </div>
-        <div>
-          <label style={labelStyle}>Policy Area</label>
-          <select value={policyArea} onChange={(e) => setPolicyArea(e.target.value)} style={selectStyle}>
+        <div className='single-filter-container'>
+          <label>Policy Area</label>
+          <select value={policyArea} onChange={e => setPolicyArea(e.target.value)}>
             <option value="">All</option>
-            {policyAreas.map((pa) => (
+            {policyAreas.map(pa => (
               <option key={pa} value={pa}>{pa}</option>
             ))}
           </select>
@@ -206,41 +297,33 @@ export default function VizTopInfluencers() {
       </div>
 
       {/* Legend */}
-      <div style={{ display: "flex", gap: "1rem", marginBottom: "0.75rem" }}>
+      <div className='legend'>
         {Object.entries(PARTY_COLORS).map(([p, color]) => (
-          <div key={p} style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "12px" }}>
+          <div key={p} style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "12px", color: "BROWN" }}>
             <div style={{ width: 12, height: 12, borderRadius: 2, background: color }} />
             {p === "D" ? "Democrat" : p === "R" ? "Republican" : "Independent"}
           </div>
         ))}
       </div>
-
-      {loading && <p>Loading...</p>}
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      {!loading && !error && data.length === 0 && <p>No results for these filters.</p>}
-      {!loading && !error && data.length > 0 && <svg ref={svgRef} />}
+      <div className='error-handling'>
+        {loading && <p>Loading...</p>}
+        {error   && <p style={{ color: "red" }}>{error}</p>}
+        {!loading && !error && chartData.length === 0 && <p>No results for these filters.</p>}
+      </div>
+      {!loading && !error && (
+        <div className='chart-container'>
+          <svg ref={svgRef} />
+        </div>
+      )}
     </div>
   );
 }
 
-const labelStyle: React.CSSProperties = {
-  display: "block",
-  fontSize: "12px",
-  color: "#555",
-  marginBottom: "4px",
-};
-
-const selectStyle: React.CSSProperties = {
-  fontSize: "13px",
-  padding: "4px 8px",
-  borderRadius: "4px",
-  border: "1px solid #ccc",
-};
 
 const btnStyle: React.CSSProperties = {
-  fontSize: "13px",
-  padding: "5px 12px",
+  fontSize:     "13px",
+  padding:      "5px 12px",
   borderRadius: "4px",
-  border: "none",
-  cursor: "pointer",
+  border:       "none",
+  cursor:       "pointer",
 };
