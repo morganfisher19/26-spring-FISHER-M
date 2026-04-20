@@ -6,20 +6,26 @@ export const VISUALIZATIONS = [
     id: "bipartisanship",
     title: "Bipartisanship In Congress",
     description: "How often do the parties agree with one another?",
+    image: "../../images/bipartisan-cover.png",
   },
   {
     id: "bill-survival",
     title: "How a Bill Survives Congress",
     description: "How many bills actually become law?",
+    image: "../../images/bill-funnel-cover.png",
+
   },
   {
     id: "activity-over-time",
     title: "Congressional Activity Over Time",
     description: "When are members voting the most?",
+    image: "../../images/activity-cover.png",
+
   },
   { id: "top-influencers",
     title: "Top Influencers in Congress",
-    description: "Which members have the most influence in Congress?"
+    description: "Which members have the most influence in Congress?",
+    image: "../../images/top-influencers-cover.png",
   },
 
 ];
@@ -38,8 +44,7 @@ export default function VizGallery() {
             onClick={() => navigate(`/visualizations/${viz.id}`)}
           >
             <div className="viz-thumbnail">
-              {/* Replace with <img src={viz.image} alt={viz.title} /> later */}
-              <span className="viz-thumbnail-placeholder">Image</span>
+              <img src={viz.image} alt={viz.title} />
             </div>
             <div className="viz-card-body">
               <h2>{viz.title}</h2>

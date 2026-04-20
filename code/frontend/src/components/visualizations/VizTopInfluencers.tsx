@@ -144,12 +144,12 @@ export default function VizTopInfluencers() {
         .attr("transform", `translate(0,${height})`);
       root.append("g").attr("class", "y-axis");
       root.append("g").attr("class", "bars");
-      root.append("g").attr("class", "score-labels");
+      root.append("g").attr("class", "score-labels")
       root.append("text").attr("class", "x-label")
         .attr("x", width / 2)
         .attr("y", height + 42)
         .attr("text-anchor", "middle")
-        .attr("font-size", "12px")
+        .attr("font-size", "14px")
         .attr("fill", BROWN);
     }
 
@@ -175,7 +175,7 @@ export default function VizTopInfluencers() {
           .tickFormat(d3.format(",d")) as any
       )
       .call(g => {
-        g.selectAll("text").attr("fill", BROWN).attr("font-size", "11px");
+        g.selectAll("text").attr("fill", BROWN).attr("font-size", "14px");
         g.selectAll("line, path").attr("stroke", BROWN);
       });
 
@@ -189,7 +189,7 @@ export default function VizTopInfluencers() {
         }) as any
       )
       .call(g => {
-        g.selectAll("text").attr("fill", BROWN).attr("font-size", "12px");
+        g.selectAll("text").attr("fill", BROWN).attr("font-size", "14px");
         g.selectAll("line, path").attr("stroke", BROWN);
       });
 
@@ -208,6 +208,8 @@ export default function VizTopInfluencers() {
       .attr("rx",     3)
       .style("cursor", "pointer")
       .on("click", (event, d) => navigate(`/member/${d.member_id}`))
+      .on("mouseover", (event, d) => d3.select(event.currentTarget).attr("fill", d3.color(PARTY_COLORS[d.party] ?? "#6b7280")!.darker(0.6).toString()))
+      .on("mouseout",  (event, d) => d3.select(event.currentTarget).attr("fill", PARTY_COLORS[d.party] ?? "#6b7280"))
       .merge(bars as any)
       .transition().duration(DURATION)
       .attr("y",      d => y(d.member_id) ?? 0)
@@ -230,7 +232,7 @@ export default function VizTopInfluencers() {
       .attr("y",                d => (y(d.member_id) ?? 0) + y.bandwidth() / 2)
       .attr("x",                d => x(d.score) + 6)
       .attr("dominant-baseline","middle")
-      .attr("font-size",        "11px")
+      .attr("font-size",        "14px")
       .attr("fill",             BROWN)
       .attr("opacity",          0)
       .text(d => d.score.toLocaleString())
@@ -249,7 +251,8 @@ export default function VizTopInfluencers() {
     // X axis label
     root.select(".x-label")
       .transition().duration(DURATION)
-      .text(METRIC_LABELS[metric]);
+      .text(METRIC_LABELS[metric])
+      .attr("font-weight", "bold");
 
   }, [chartData, metric, navigate]);
 
@@ -299,7 +302,7 @@ export default function VizTopInfluencers() {
       {/* Legend */}
       <div className='legend'>
         {Object.entries(PARTY_COLORS).map(([p, color]) => (
-          <div key={p} style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "12px", color: "BROWN" }}>
+          <div key={p} style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "14px", color: "BROWN" }}>
             <div style={{ width: 12, height: 12, borderRadius: 2, background: color }} />
             {p === "D" ? "Democrat" : p === "R" ? "Republican" : "Independent"}
           </div>
@@ -318,12 +321,3 @@ export default function VizTopInfluencers() {
     </div>
   );
 }
-
-
-const btnStyle: React.CSSProperties = {
-  fontSize:     "13px",
-  padding:      "5px 12px",
-  borderRadius: "4px",
-  border:       "none",
-  cursor:       "pointer",
-};

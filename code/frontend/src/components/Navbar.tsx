@@ -6,7 +6,7 @@ const VIZ_LINKS = [
   { label: "Bipartisanship In Congress", path: "/visualizations/bipartisanship" },
   { label: "Bill Survival", path: "/visualizations/bill-survival" },
   { label: "Congressional Activity", path: "/visualizations/activity-over-time" },
-  { label: "Bill Activity", path: "/visualizations/top-influencers" },
+  { label: "Top Influencers", path: "/visualizations/top-influencers" },
 ];
 
 export default function Navbar() {

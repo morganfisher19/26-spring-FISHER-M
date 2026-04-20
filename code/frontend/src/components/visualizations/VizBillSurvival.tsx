@@ -152,8 +152,8 @@ export default function VizBillSurvival() {
     updateChart(key);
   }
 
-  if (error)   return <p>{error}</p>;
-  if (loading) return <p>Loading…</p>;
+  if (error)   return <div className='error-handling'><p>{error}</p></div>;
+  if (loading) return <div className='error-handling'><p>Loading…</p></div>;
 
   return (
     <div className='funnel-container'>

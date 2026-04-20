@@ -183,26 +183,28 @@ export default function MemberVotes() {
       </section>
 
       <section className="filter">
-        <label htmlFor="policy-area-filter">Policy Area:</label>
-        <select
-          id="policy-area-filter"
-          value={selectedArea}
-          onChange={e => setSelectedArea(e.target.value)}
-        >
-          <option value="All Areas">All Areas</option>
-          {policyAreas.map(area => (
-            <option key={area} value={area}>{area}</option>
-          ))}
-        </select>
-
-        <label className="checkboxLabel">
-          <input
-            type="checkbox"
-            checked={lawFilter}
-            onChange={e => setLawFilter(e.target.checked)}
-          />
-          Passed into law
-        </label>
+        <div className="policy-filter">
+          <label>Policy Area:</label>
+          <select
+            value={selectedArea}
+            onChange={e => setSelectedArea(e.target.value)}
+          >
+            <option value="All Areas">All Areas</option>
+            {policyAreas.map(area => (
+              <option key={area} value={area}>{area}</option>
+            ))}
+          </select>
+        </div>
+        <div className="law-filter">
+          <label className="checkboxLabel">
+            <input
+              type="checkbox"
+              checked={lawFilter}
+              onChange={e => setLawFilter(e.target.checked)}
+            />
+            Passed into law
+          </label>
+        </div>
       </section>
 
       <section className="tabs">

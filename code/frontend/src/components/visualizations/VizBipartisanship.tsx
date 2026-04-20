@@ -278,8 +278,10 @@ export default function VizBipartisanship() {
       </div>
 
       {/* Chart area */}
-      {loading && <p>Loading...</p>}
-      {error   && <p>Error: {error}</p>}
+      <div className='error-handling'>
+        {loading && <p>Loading...</p>}
+        {error   && <p>Error: {error}</p>}
+      </div>
       {!loading && !error && (
         <div className='chart-container'>
           <svg ref={svgRef} />

@@ -335,9 +335,10 @@ export default function VizActivityOverTime() {
           </select>
         </div>
       </div>
-
-      {loading && <p>Loading...</p>}
-      {error   && <p>{error}</p>}
+      <div className='error-handling'>
+        {loading && <p>Loading...</p>}
+        {error   && <p>{error}</p>}
+      </div>
       {!loading && !error && (
         <div className='chart-container'>
           <svg ref={svgRef} />
