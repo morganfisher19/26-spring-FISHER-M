@@ -69,10 +69,32 @@ def clean_vote_party_totals():
 
     cleaned_sponsorships = [cast_record(r, TYPE_MAP_PARTY_TOTALS) for r in cleaned_records]
 
-    # Check data:    
-    print("Total records:", len(cleaned_records))
-    unique_combinations = set((r["vote_id"], r["party"]) for r in cleaned_records)
-    print("Unique IDs:", len(unique_combinations))
+    # Check data:
+    # Deduplicate exact duplicates first
+    seen_records = set()
+    deduped_records = []
+    for r in cleaned_records:
+        record_tuple = tuple(r[k] for k in sorted(r.keys()))
+        if record_tuple not in seen_records:
+            seen_records.add(record_tuple)
+            deduped_records.append(r)
+
+    print(f"Removed {len(cleaned_records) - len(deduped_records)} exact duplicate(s)")
+
+    # Now check for (vote_id, party) conflicts with differing data
+    unique_combinations = set((r["vote_id"], r["party"]) for r in deduped_records)
+    if len(deduped_records) != len(unique_combinations):
+        from collections import Counter
+        counts = Counter((r["vote_id"], r["party"]) for r in deduped_records)
+        for key, n in sorted(counts.items()):
+            if n > 1:
+                matches = [r for r in deduped_records if (r["vote_id"], r["party"]) == key]
+                print(f"CONFLICT {key} x{n}:")
+                for m in matches:
+                    print(f"  {m}")
+        raise ValueError("Conflicting records with same (vote_id, party) but different data")
+
+    cleaned_records = deduped_records
 
     # Save to gold JSON
     export_gold("vote_party_totals_119.json", cleaned_records, 4)

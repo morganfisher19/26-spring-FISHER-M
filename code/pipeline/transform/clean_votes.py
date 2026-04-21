@@ -198,6 +198,12 @@ def clean_votes():
         print("Total records:", len(cleaned_votes))
         print("Unique IDs:", len(set(r["vote_id"] for r in cleaned_votes)))
 
+        if len(cleaned_votes) != len(set(r["vote_id"] for r in cleaned_votes)):
+            raise ValueError(
+                f"Repeated IDs in votes_119.json"
+            )
+
+
         return cleaned_votes
 
     # Dealing with nomination vote data

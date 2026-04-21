@@ -65,5 +65,10 @@ def clean_laws():
     print("Total records:", len(cleaned_laws))
     print("Unique IDs:", len(set(r["law_num"] for r in cleaned_laws)))
 
+    if len(cleaned_laws) != len(set(r["law_num"] for r in cleaned_laws)):
+        raise ValueError(
+            f"Repeated IDs in laws_119.json"
+        )
+
     # Save cleaned data
     export_gold("laws_119.json", cleaned_laws, 4)

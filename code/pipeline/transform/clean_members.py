@@ -196,6 +196,12 @@ def clean_members():
     print("Total records:", len(merged_members))
     print("Unique IDs:", len(set(r["member_id"] for r in merged_members)))
 
+    if len(merged_members) != len(set(r["member_id"] for r in merged_members)):
+        raise ValueError(
+            f"Repeated IDs in members_119.json"
+        )
+
+
 
     # Write merged gold JSON
     export_gold("members_119.json", merged_members, 4)

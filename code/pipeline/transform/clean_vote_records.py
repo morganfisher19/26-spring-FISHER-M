@@ -111,6 +111,11 @@ def clean_vote_records():
     unique_combinations = set((r["vote_id"], r["member_id"]) for r in cleaned_records)
     print("Unique IDs:", len(unique_combinations))
 
+    if len(cleaned_records) != len(unique_combinations):
+        raise ValueError(
+            f"Repeated IDs in vote_records_119.json"
+        )
+
 
     # Save to gold JSON
     export_gold("vote_records_119.json", cleaned_records, 2)

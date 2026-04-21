@@ -44,4 +44,10 @@ def clean_bill_sponsorships():
     print("Total records:", len(cleaned_sponsorships))
     print("Unique IDs:", len(set((r["bill_id"], r["member_id"], r["sponsor_type"]) for r in cleaned_sponsorships)))
 
+    if len(cleaned_sponsorships) != len(set((r["bill_id"], r["member_id"], r["sponsor_type"]) for r in cleaned_sponsorships)):
+        raise ValueError(
+            f"Repeated IDs in bill_sponsorships_119.json"
+        )
+
+
     export_gold("bill_sponsorships_119.json", cleaned_sponsorships, 2)

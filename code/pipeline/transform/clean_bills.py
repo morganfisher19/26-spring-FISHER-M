@@ -69,5 +69,11 @@ def clean_bills():
     print("Total records:", len(cleaned_bills))
     print("Unique IDs:", len(set(r["bill_id"] for r in cleaned_bills)))
 
+    if len(cleaned_bills) != len(set(r["bill_id"] for r in cleaned_bills)):
+        raise ValueError(
+            f"Repeated IDs in bills_119.json"
+        )
+
+
     # Save cleaned data
     export_gold("bills_119.json", cleaned_bills, 4)
