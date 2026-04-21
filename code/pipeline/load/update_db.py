@@ -84,6 +84,10 @@ def upsert_bills(cur):
 
 def upsert_votes(cur):
     votes = load_gold("votes_119.json")
+    bills = load_gold("bills_119.json")
+
+    valid_bill_ids = {b.get("bill_id") for b in bills if b.get("bill_id")}
+
     rows = [(
         v.get("vote_id"),
         v.get("bill_id"),
@@ -93,8 +97,9 @@ def upsert_votes(cur):
         v.get("session_num"),
         v.get("vote_date"),
         v.get("result")
-    ) for v in votes]
-
+    ) for v in votes
+        if v.get("bill_id") in valid_bill_ids]
+    
     execute_values(cur, """
         INSERT INTO votes (vote_id, bill_id, question, chamber, congress, session_num, vote_date, result)
         VALUES %s
@@ -104,10 +109,10 @@ def upsert_votes(cur):
 
 def upsert_vote_records(cur):
     vote_records = load_gold("vote_records_119.json")
-    votes = load_gold("votes_119.json")
     members = load_gold("members_119.json")
 
-    valid_vote_ids = {v.get("vote_id") for v in votes if v.get("vote_id")}
+    cur.execute("SELECT vote_id FROM votes")
+    valid_vote_ids = {row[0] for row in cur.fetchall()}
     valid_member_ids = {m.get("member_id") for m in members if m.get("member_id")}
 
     rows = [(
@@ -130,9 +135,9 @@ def upsert_vote_records(cur):
 
 def upsert_vote_party_totals(cur):
     vote_party_totals = load_gold("vote_party_totals_119.json")
-    votes = load_gold("votes_119.json")
 
-    valid_vote_ids = {v.get("vote_id") for v in votes if v.get("vote_id")}
+    cur.execute("SELECT vote_id FROM votes")
+    valid_vote_ids = {row[0] for row in cur.fetchall()}
 
     rows = [(
         vt.get("vote_id"),
