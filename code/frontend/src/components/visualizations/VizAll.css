@@ -58,6 +58,11 @@
     justify-content: center;
 }
 
+.svg {
+  width: 100%;
+  height: auto;
+}
+
 /* Bottom text */
 .text-container {
   width: 100%;

@@ -1,7 +1,7 @@
 '''
 run_pipeline.py callls functions from other scirpts in the specified order:
 
-1. calls extract steps (hits APIs/scrapes XML, saves to silver/)
+1. calls extract steps (gets APIs/scrapes XML, saves to silver/)
 2. calls transform steps (reads silver/, cleans, saves to gold/)
 3. calls load steps (reads gold/, inserts into DB)
 
@@ -71,7 +71,7 @@ clean_bill_sponsorships()
 clean_laws()
 
 
-# # --- Load ---
+# --- Load ---
 from pipeline.load.update_db import update_db
 
 update_db()

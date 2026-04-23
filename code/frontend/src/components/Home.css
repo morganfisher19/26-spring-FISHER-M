@@ -87,3 +87,15 @@ main {
   background-repeat: repeat-x;  /* repeats horizontally across the full width */
   background-size: auto 100%;   /* keeps aspect ratio, fills the height */
 }
+
+/* Modifying for sizes for tablet & mobile */
+
+@media (max-width: 768px) {
+  .imageStack {
+    display: none;
+  }
+
+  .content {
+    margin-top: 3rem;
+  }
+}

@@ -114,11 +114,12 @@ function aggregate(
 
 // ── D3 chart setup (runs once) ───────────────────────────────────────────────
 const MARGIN = { top: 20, right: 20, bottom: 80, left: 60 };
-const W = 700 - MARGIN.left - MARGIN.right;
-const H = 380 - MARGIN.top - MARGIN.bottom;
 const DURATION = 500;
 
-function initChart(svgEl: SVGSVGElement) {
+function initChart(svgEl: SVGSVGElement, width: number) {
+  const W = width - MARGIN.left - MARGIN.right;
+  const H = W * 5 / 8;
+
   const root = d3
     .select(svgEl)
     .attr("width",  W + MARGIN.left + MARGIN.right)
@@ -161,8 +162,12 @@ function initChart(svgEl: SVGSVGElement) {
 function updateChart(
   svgEl: SVGSVGElement,
   data: DataPoint[],
-  gran: Granularity
+  gran: Granularity,
+  width: number
 ) {
+  const W = width - MARGIN.left - MARGIN.right;
+  const H = W * 5 / 8;
+
   const root = d3.select(svgEl);
   const g    = root.select<SVGGElement>("g");
 
@@ -258,7 +263,9 @@ function updateChart(
 // ── Component ────────────────────────────────────────────────────────────────
 export default function VizActivityOverTime() {
   const svgRef       = useRef<SVGSVGElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null); 
   const chartReady   = useRef(false);
+  const [containerWidth, setContainerWidth] = useState(800);
 
   const [rawVotes,   setRawVotes]   = useState<RawVote[]>([]);
   const [policyAreas, setPolicyAreas] = useState<string[]>([]);
@@ -269,6 +276,16 @@ export default function VizActivityOverTime() {
   const [chamber,    setChamber]    = useState<Chamber>("");
   const [granularity, setGranularity] = useState<Granularity>("week");
   const [policyArea, setPolicyArea] = useState("");
+
+  // set width of chart
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const observer = new ResizeObserver(([entry]) => {
+      setContainerWidth(Math.min(entry.contentRect.width, 800));
+    });
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, [loading]);
 
   // fetch raw votes once
   useEffect(() => {
@@ -292,22 +309,23 @@ export default function VizActivityOverTime() {
       .catch(() => {});
   }, []);
 
-  // init chart once data arrives
-  useEffect(() => {
-    if (!svgRef.current || !rawVotes.length || chartReady.current) return;
-    initChart(svgRef.current);
-    chartReady.current = true;
-  }, [rawVotes]);
-
   // update chart whenever filters or raw data change
   useEffect(() => {
-    if (!svgRef.current || !chartReady.current || !rawVotes.length) return;
-    const data = aggregate(rawVotes, chamber, policyArea, granularity);
-    updateChart(svgRef.current, data, granularity);
-  }, [rawVotes, chamber, granularity, policyArea]);
+  if (!svgRef.current || !rawVotes.length) return;
+  if (!chartReady.current) {
+    initChart(svgRef.current, containerWidth);
+    chartReady.current = true;
+  } else {
+    // Clear and re-init SVG so clip path and groups resize correctly
+    d3.select(svgRef.current).selectAll("*").remove();
+    initChart(svgRef.current, containerWidth);
+  }
+  const data = aggregate(rawVotes, chamber, policyArea, granularity);
+  updateChart(svgRef.current, data, granularity, containerWidth);
+}, [rawVotes, chamber, granularity, policyArea, containerWidth]);
 
   return (
-    <div className='activity-container'>
+    <div className='activity-container' ref={containerRef}>
       <div className="filter-container">
         <div className='single-filter-container'>
           <label>Chamber:</label>

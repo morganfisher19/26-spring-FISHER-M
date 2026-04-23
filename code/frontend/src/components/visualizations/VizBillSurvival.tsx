@@ -9,16 +9,28 @@ interface Stage { label: string; count: number; }
 type FunnelData = Record<string, Stage[]>;
 
 const MARGIN = { top: 40, right: 40, bottom: 60, left: 80 };
-const W = 800 - MARGIN.left - MARGIN.right;
-const H = 500 - MARGIN.top - MARGIN.bottom;
 
 export default function VizBillSurvival() {
   const svgRef    = useRef<SVGSVGElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const allData   = useRef<FunnelData>({});       // cache — never triggers re-render
   const [keys, setKeys]       = useState<string[]>([]);
   const [selected, setSelected] = useState("All");
   const [loading, setLoading] = useState(true);
   const [error, setError]     = useState<string | null>(null);
+  const [containerWidth, setContainerWidth] = useState(800);
+
+  // ── ResizeObserver ────────────────────────────────────────────
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const observer = new ResizeObserver(([entry]) => {
+      setContainerWidth(Math.min(entry.contentRect.width, 800));
+    });
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, [loading]);
+
+
 
   // ── 1. Fetch everything ONCE ──────────────────────────────────
   useEffect(() => {
@@ -36,8 +48,13 @@ export default function VizBillSurvival() {
   useEffect(() => {
     if (!keys.length || !svgRef.current) return;
 
+    d3.select(svgRef.current).selectAll("*").remove();
+
+    const W = containerWidth - MARGIN.left - MARGIN.right;
+    const H = W * 5 / 8;
+
     const svg = d3.select(svgRef.current)
-      .attr("width",  W + MARGIN.left + MARGIN.right)
+      .attr("width",  containerWidth)
       .attr("height", H + MARGIN.top  + MARGIN.bottom);
 
     const g = svg.append("g")
@@ -57,15 +74,17 @@ export default function VizBillSurvival() {
       .attr("fill", "#6B3A3A")
       .text("Number of Bills");
 
-    // Trigger first render with "All"
-    updateChart("All");
+    updateChart(selected, containerWidth);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [keys]);
+  }, [keys, containerWidth]);
 
   // ── 3. Pure D3 update (no React state touched) ────────────────
-  function updateChart(key: string) {
+  function updateChart(key: string, width = containerWidth) {
     const data = allData.current[key];
     if (!data || !svgRef.current) return;
+
+    const W = width - MARGIN.left - MARGIN.right;
+    const H = W * 5 / 8;
 
     const g = d3.select(svgRef.current).select<SVGGElement>("g.chart-root");
 
@@ -82,22 +101,28 @@ export default function VizBillSurvival() {
       .interpolator(d3.interpolateRgb("#FFB3C1", "#E6677F"));
 
     // Axes
-    g.select<SVGGElement>(".x-axis")
-      .transition().duration(400)
+    const fontSize = containerWidth < 500 ? "10px" : "14px";
+    
+    const xAxis = g.select<SVGGElement>(".x-axis");
+    xAxis.transition().duration(400)
       .call(d3.axisBottom(x))
-      .selectAll("text")
-      .attr("dy", "1.2em")
-      .style("font-size", "14px")
-      .style("fill", "#6B3A3A");
-    g.select<SVGGElement>(".x-axis")
-      .selectAll("line, path")
-      .style("stroke", "#6B3A3A");
+      .on("end", () => {
+        xAxis.selectAll("text")
+          .attr("dy", "1.2em")
+          .style("font-size", fontSize)
+          .style("fill", "#6B3A3A")
+          .style("text-anchor","middle")
+          .attr("transform", "rotate(0)");
+        xAxis.selectAll("line, path").style("stroke", "#6B3A3A");
+
+        if (width < 650) wrapAxisLabels(g, width);
+       });
 
     g.select<SVGGElement>(".y-axis")
       .transition().duration(400)
       .call(d3.axisLeft(y).ticks(6).tickFormat(d3.format(",d")))
       .selectAll("text")
-      .style("font-size", "14px")
+      .style("font-size", fontSize)
       .style("fill", "#6B3A3A");
     g.select<SVGGElement>(".y-axis")
       .selectAll("line, path")
@@ -148,15 +173,33 @@ export default function VizBillSurvival() {
   // ── 4. On dropdown change — D3 only, zero React re-renders ───
   function handleSelect(e: React.ChangeEvent<HTMLSelectElement>) {
     const key = e.target.value;
-    setSelected(key);   // only to keep <select> controlled
+    setSelected(key);
     updateChart(key);
+  }
+
+  // Resize axis labels
+  function wrapAxisLabels(g: d3.Selection<SVGGElement, unknown, null, undefined>, width: number) {
+    g.selectAll<SVGTextElement, unknown>(".x-axis text").each(function () {
+      const el = d3.select(this);
+      const words = (el.text() || "").split(" ");
+      if (words.length < 2) return;
+
+      el.text(null);
+
+      words.forEach((word, i) => {
+        el.append("tspan")
+          .attr("x", 0)
+          .attr("dy", i === 0 ? "0.5em" : "1.1em") // push first line down so both lines sit below the axis
+          .text(word);
+      });
+    });
   }
 
   if (error)   return <div className='error-handling'><p>{error}</p></div>;
   if (loading) return <div className='error-handling'><p>Loading…</p></div>;
 
   return (
-    <div className='funnel-container'>
+    <div className='funnel-container' ref={containerRef}>
       <div className='filter-container'>
         <label htmlFor="policy-select">
           Policy Area:

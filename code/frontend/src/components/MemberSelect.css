@@ -104,3 +104,10 @@ button:disabled {
 .externalLink:hover {
   color: #E6677F;
 }
+
+/* Modifying for sizes for tablet & mobile */
+@media (max-width: 768px) {
+  .member-select-form {
+    width: 80%;
+  }
+}
