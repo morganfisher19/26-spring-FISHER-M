@@ -27,6 +27,8 @@ interface BarData {
 
 const AGREEMENT_THRESHOLD = 0.5; // both parties > 50% yes = agreement
 const MARGIN = { top: 40, right: 40, bottom: 60, left: 80 };
+const WIDTH = 800 - MARGIN.left - MARGIN.right;
+const HEIGHT = 500 - MARGIN.top - MARGIN.bottom;
 
 function classifyVotes(votes: VoteData[]): BarData[] {
   let agree = 0, disagree = 0;
@@ -51,8 +53,6 @@ function classifyVotes(votes: VoteData[]): BarData[] {
 
 export default function VizBipartisanship() {
   const svgRef      = useRef<SVGSVGElement>(null);
-  const containerRef  = useRef<HTMLDivElement>(null);
-  const [containerWidth, setContainerWidth] = useState(800);
 
   const [allVotes,   setAllVotes]   = useState<VoteData[]>([]);
   const [policyAreas, setPolicyAreas] = useState<string[]>([]);
@@ -60,16 +60,6 @@ export default function VizBipartisanship() {
   const [policyArea, setPolicyArea] = useState("all");
   const [loading,    setLoading]    = useState(true);
   const [error,      setError]      = useState<string | null>(null);
-
-  // ── ResizeObserver ────────────────────────────────────────────
-  useEffect(() => {
-    if (!containerRef.current) return;
-    const observer = new ResizeObserver(([entry]) => {
-      setContainerWidth(Math.min(entry.contentRect.width, 800));
-    });
-    observer.observe(containerRef.current);
-    return () => observer.disconnect();
-  }, [loading]);
 
   // Fetch all data once on mount
   useEffect(() => {
@@ -98,9 +88,6 @@ export default function VizBipartisanship() {
   // Draw / update chart whenever data or filters change
   useEffect(() => {
     if (!allVotes.length || !svgRef.current) return;
-
-    const WIDTH = containerWidth - MARGIN.left - MARGIN.right;
-    const HEIGHT = WIDTH * 5 / 8;
 
     // Apply filters client-side
     const filtered = allVotes.filter((v) => {
@@ -258,11 +245,11 @@ export default function VizBipartisanship() {
               .remove()
           )
       );
-  }, [allVotes, chamber, policyArea, containerWidth]);
+  }, [allVotes, chamber, policyArea]);
 
 
   return (
-    <div className='bipartisan-container' ref={containerRef}>
+    <div className='bipartisan-container'>
       {/* Filters */}
       <div className='filter-container'>
         <div className='single-filter-container'>

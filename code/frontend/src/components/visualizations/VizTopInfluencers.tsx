@@ -50,8 +50,6 @@ const TOP_N = 10;
 
 export default function VizTopInfluencers() {
   const svgRef = useRef<SVGSVGElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [containerWidth, setContainerWidth] = useState(800);
 
   const [raw, setRaw]           = useState<RawRow[]>([]);
   const [policyAreas, setPolicyAreas] = useState<string[]>([]);
@@ -63,16 +61,6 @@ export default function VizTopInfluencers() {
   const [party, setParty]           = useState<Party>("");
   const [policyArea, setPolicyArea] = useState("");
   const navigate = useNavigate();
-
-  // ── ResizeObserver ────────────────────────────────────────────
-  useEffect(() => {
-    if (!containerRef.current) return;
-    const observer = new ResizeObserver(([entry]) => {
-      setContainerWidth(Math.min(entry.contentRect.width, 800));
-    });
-    observer.observe(containerRef.current);
-    return () => observer.disconnect();
-  }, [loading]);
 
   // Fetch all data once
   useEffect(() => {
@@ -134,33 +122,38 @@ export default function VizTopInfluencers() {
     if (!svgRef.current) return;
 
     const margin     = { top: 16, right: 64, bottom: 48, left: 190 };
-    const barHeight = 36;
-    const height    = TOP_N * barHeight;
-    const width     = containerWidth - margin.left - margin.right;
+    const totalWidth = 660;
+    const barHeight  = 36;
+    const height     = TOP_N * barHeight;
+    const width      = totalWidth - margin.left - margin.right;
     const DURATION   = 500;
 
     const svgEl = d3.select(svgRef.current);
 
-    // Always clear and rebuild so dimensions stay correct
-    svgEl.selectAll("*").remove();
-    svgEl
-      .attr("width",  containerWidth)
-      .attr("height", height + margin.top + margin.bottom);
+    // One-time SVG setup
+    if (svgEl.select("g.root").empty()) {
+      svgEl
+        .attr("width",  totalWidth)
+        .attr("height", height + margin.top + margin.bottom);
 
-    const root = svgEl.append("g")
-      .attr("class", "root")
-      .attr("transform", `translate(${margin.left},${margin.top})`);
+      const root = svgEl.append("g")
+        .attr("class", "root")
+        .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    root.append("g").attr("class", "x-axis").attr("transform", `translate(0,${height})`);
-    root.append("g").attr("class", "y-axis");
-    root.append("g").attr("class", "bars");
-    root.append("g").attr("class", "score-labels");
-    root.append("text").attr("class", "x-label")
-      .attr("x", width / 2)
-      .attr("y", height + 42)
-      .attr("text-anchor", "middle")
-      .attr("font-size", "14px")
-      .attr("fill", BROWN);
+      root.append("g").attr("class", "x-axis")
+        .attr("transform", `translate(0,${height})`);
+      root.append("g").attr("class", "y-axis");
+      root.append("g").attr("class", "bars");
+      root.append("g").attr("class", "score-labels")
+      root.append("text").attr("class", "x-label")
+        .attr("x", width / 2)
+        .attr("y", height + 42)
+        .attr("text-anchor", "middle")
+        .attr("font-size", "14px")
+        .attr("fill", BROWN);
+    }
+
+    const root = svgEl.select<SVGGElement>("g.root");
 
     // Scales
     const y = d3.scaleBand()
@@ -261,10 +254,10 @@ export default function VizTopInfluencers() {
       .text(METRIC_LABELS[metric])
       .attr("font-weight", "bold");
 
-  }, [chartData, metric, navigate, containerWidth]);
+  }, [chartData, metric, navigate]);
 
   return (
-    <div className="influencer-container" ref={containerRef}>
+    <div className="influencer-container">
       {/* Metric toggle */}
       <div className="chart-toggle">
         {(Object.keys(METRIC_LABELS) as Metric[]).map(m => (
