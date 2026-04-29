@@ -37,3 +37,14 @@
   border-radius: 8px;
   color: #999;
 }
+
+/* Modifying for mobile */
+@media (max-width: 500px) {
+  .viz-container h1 {
+    font-size: 2rem;
+  }
+
+  .viz-container p {
+    font-size: 1rem;
+}
+}

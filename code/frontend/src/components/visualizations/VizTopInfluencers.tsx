@@ -299,7 +299,7 @@ export default function VizTopInfluencers() {
       {/* Filters */}
       <div className='filter-container'>
         <div className='single-filter-container'>
-          <label>Chamber</label>
+          <label>Chamber:</label>
           <select value={chamber} onChange={e => setChamber(e.target.value as Chamber)}>
             <option value="">All</option>
             <option value="H">House</option>
@@ -307,7 +307,7 @@ export default function VizTopInfluencers() {
           </select>
         </div>
         <div className='single-filter-container'>
-          <label>Party</label>
+          <label>Party:</label>
           <select value={party} onChange={e => setParty(e.target.value as Party)}>
             <option value="">All</option>
             <option value="D">Democrat</option>
@@ -315,7 +315,7 @@ export default function VizTopInfluencers() {
           </select>
         </div>
         <div className='single-filter-container'>
-          <label>Policy Area</label>
+          <label>Policy Area:</label>
           <select value={policyArea} onChange={e => setPolicyArea(e.target.value)}>
             <option value="">All</option>
             {policyAreas.map(pa => (

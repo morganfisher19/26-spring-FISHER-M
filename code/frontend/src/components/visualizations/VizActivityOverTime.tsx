@@ -205,11 +205,13 @@ function updateChart(
   const xFmt = gran === "month" ? d3.timeFormat("%b %Y") : d3.timeFormat("%b %d '%y");
 
   // For days, tick every 7 bars (weekly); for weeks every 4; months every 1
+  const skipEvery = W < 500 ? 3 : W < 700 ? 2 : 1;
+
   const tickData = gran === "month"
-  ? data
+  ? data.filter((_, i) => i % skipEvery === 0)
   : gran === "day"
-  ? data.filter((d) => d.period.getDate() === 1)
-  : data.filter((_, i) => i % 5 === 0);
+  ? data.filter((d) => d.period.getDate() === 1 && (skipEvery === 1 || d.period.getMonth() % skipEvery === 0))
+  : data.filter((_, i) => i % (5 * skipEvery) === 0);
 
   g.select<SVGGElement>(".x-axis")
     .call(
