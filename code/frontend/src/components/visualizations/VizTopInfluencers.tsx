@@ -3,8 +3,6 @@ import { useNavigate } from "react-router-dom";
 import * as d3 from "d3";
 import "./VizAll.css";
 
-const API_BASE = "http://localhost:5000";
-
 // Shape returned by /api/visualizations/top_influencers
 interface RawRow {
   member_id: string;
@@ -207,7 +205,7 @@ export default function VizTopInfluencers() {
       .attr("fill",   d => PARTY_COLORS[d.party] ?? "#6b7280")
       .attr("rx",     3)
       .style("cursor", "pointer")
-      .on("click", (event, d) => navigate(`/member/${d.member_id}`))
+      .on("click", (_event, d) => navigate(`/member/${d.member_id}`))
       .on("mouseover", (event, d) => d3.select(event.currentTarget).attr("fill", d3.color(PARTY_COLORS[d.party] ?? "#6b7280")!.darker(0.6).toString()))
       .on("mouseout",  (event, d) => d3.select(event.currentTarget).attr("fill", PARTY_COLORS[d.party] ?? "#6b7280"))
       .merge(bars as any)

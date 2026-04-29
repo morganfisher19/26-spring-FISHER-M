@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { VISUALIZATIONS } from "./VizGallery";
 import VizBipartisanship from "./visualizations/VizBipartisanship.tsx";
 import VizBillSurvival from "./visualizations/VizBillSurvival.tsx";

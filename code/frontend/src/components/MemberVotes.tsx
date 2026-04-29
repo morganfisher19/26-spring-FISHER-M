@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import "./MemberVotes.css";
 
 
@@ -36,8 +36,6 @@ interface MemberDetail {
 }
 
 type Tab = "votes" | "sponsored" | "cosponsored";
-
-const API_BASE = "http://localhost:5000";
 
 const BILL_TYPE_MAP: Record<string, string> = {
   HR:      "house-bill",
