@@ -9,6 +9,8 @@ const MARGIN = { top: 40, right: 40, bottom: 60, left: 80 };
 const W = 800 - MARGIN.left - MARGIN.right;
 const H = 500 - MARGIN.top - MARGIN.bottom;
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export default function VizBillSurvival() {
   const svgRef    = useRef<SVGSVGElement>(null);
   const allData   = useRef<FunnelData>({});       // cache — never triggers re-render
@@ -19,7 +21,7 @@ export default function VizBillSurvival() {
 
   // ── 1. Fetch everything ONCE ──────────────────────────────────
   useEffect(() => {
-    fetch(`/api/visualizations/bill_funnel`)
+    fetch(`${API_URL}/api/visualizations/bill_funnel`)
       .then((r) => r.json())
       .then((json: FunnelData) => {
         allData.current = json;

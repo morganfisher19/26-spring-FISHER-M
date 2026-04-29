@@ -30,6 +30,8 @@ const MARGIN = { top: 40, right: 40, bottom: 60, left: 80 };
 const WIDTH = 800 - MARGIN.left - MARGIN.right;
 const HEIGHT = 500 - MARGIN.top - MARGIN.bottom;
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 function classifyVotes(votes: VoteData[]): BarData[] {
   let agree = 0, disagree = 0;
 
@@ -65,11 +67,11 @@ export default function VizBipartisanship() {
   useEffect(() => {
     setLoading(true);
     Promise.all([
-      fetch("/api/visualizations/bipartisanship").then((r) => {
+      fetch(`${API_URL}/api/visualizations/bipartisanship`).then((r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json() as Promise<VoteData[]>;
       }),
-      fetch("/api/policy_areas").then((r) => {
+      fetch(`${API_URL}/api/policy_areas`).then((r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json() as Promise<string[]>;
       }),

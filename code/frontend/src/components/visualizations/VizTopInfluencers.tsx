@@ -43,8 +43,8 @@ const PARTY_COLORS: Record<string, string> = {
 };
 
 const BROWN = "#6B3A3A";
-
 const TOP_N = 10;
+const API_URL = import.meta.env.VITE_API_URL;
 
 export default function VizTopInfluencers() {
   const svgRef = useRef<SVGSVGElement>(null);
@@ -63,8 +63,8 @@ export default function VizTopInfluencers() {
   // Fetch all data once
   useEffect(() => {
     Promise.all([
-      fetch(`/api/visualizations/top_influencers`).then(r => r.json()),
-      fetch(`/api/policy_areas`).then(r => r.json()),
+      fetch(`${API_URL}/api/visualizations/top_influencers`).then(r => r.json()),
+      fetch(`${API_URL}/api/policy_areas`).then(r => r.json()),
     ])
       .then(([rows, areas]: [RawRow[], string[]]) => {
         setRaw(rows);

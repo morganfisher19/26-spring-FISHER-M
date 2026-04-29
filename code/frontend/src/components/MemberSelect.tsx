@@ -12,7 +12,7 @@ interface Member {
   state_name: string;
   district: string;
 }
-
+const API_URL = import.meta.env.VITE_API_URL;
 
 function formatMember(m: Member): string {
   // Convert "Last, First" → "First Last"
@@ -35,7 +35,7 @@ export default function MemberSelect() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("/api/members")
+    fetch(`${API_URL}/api/members`)
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP error: ${res.status}`);
         return res.json();

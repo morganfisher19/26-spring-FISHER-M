@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
 import "./VizAll.css";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 interface RawVote {
   vote_id: string;
   vote_date: string;
@@ -270,7 +272,7 @@ export default function VizActivityOverTime() {
 
   // fetch raw votes once
   useEffect(() => {
-    fetch(`/api/visualizations/activity_over_time`)
+    fetch(`${API_URL}/api/visualizations/activity_over_time`)
       .then((r) => r.json())
       .then((json: RawVote[]) => {
         setRawVotes(json);
@@ -284,7 +286,7 @@ export default function VizActivityOverTime() {
 
   // fetch policy areas once
   useEffect(() => {
-    fetch(`/api/policy_areas`)
+    fetch(`${API_URL}/api/policy_areas`)
       .then((r) => r.json())
       .then(setPolicyAreas)
       .catch(() => {});

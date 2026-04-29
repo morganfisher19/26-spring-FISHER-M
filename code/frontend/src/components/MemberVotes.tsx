@@ -37,6 +37,8 @@ interface MemberDetail {
 
 type Tab = "votes" | "sponsored" | "cosponsored";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const BILL_TYPE_MAP: Record<string, string> = {
   HR:      "house-bill",
   S:       "senate-bill",
@@ -100,8 +102,8 @@ export default function MemberVotes() {
     setActiveTab("votes");
 
     Promise.all([
-      fetch(`/api/member/${memberId}`).then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); }),
-      fetch(`/api/member/${memberId}/sponsorships`).then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); }),
+      fetch(`${API_URL}/api/member/${memberId}`).then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); }),
+      fetch(`${API_URL}/api/member/${memberId}/sponsorships`).then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); }),
     ])
       .then(([memberData, sponsorshipData]: [MemberDetail, Sponsorship[]]) => {
         memberData.vote_records.sort(
