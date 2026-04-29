@@ -2,6 +2,34 @@ import { useEffect, useRef, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import * as d3 from "d3";
 import "./VizAll.css";
+import { FONT_SIZE } from "./VizConfig";
+
+function getChartWidth(): number {
+  const screenWidth = window.innerWidth;
+  if (screenWidth < 400)  return 120;
+  if (screenWidth < 500)  return 180;
+  if (screenWidth < 700)  return 220;
+  if (screenWidth < 900)  return 400;
+  return 600;
+}
+
+function getChartHeight(): number {
+  const screenWidth = window.innerWidth;
+  if (screenWidth < 500)  return 300;
+  if (screenWidth < 700)  return 350;
+  if (screenWidth < 900)  return 400;
+  return 500;
+}
+
+function getMarginLeft(): number {
+  const screenWidth = window.innerWidth;
+  if (screenWidth < 500)  return 140;
+  return 190;
+}
+
+const CHART_WIDTH  = getChartWidth();
+const CHART_HEIGHT = getChartHeight();
+const MARGIN_LEFT = getMarginLeft()
 
 // Shape returned by /api/visualizations/top_influencers
 interface RawRow {
@@ -119,11 +147,11 @@ export default function VizTopInfluencers() {
   useEffect(() => {
     if (!svgRef.current) return;
 
-    const margin     = { top: 16, right: 64, bottom: 48, left: 190 };
-    const totalWidth = 660;
-    const barHeight  = 36;
-    const height     = TOP_N * barHeight;
-    const width      = totalWidth - margin.left - margin.right;
+    const margin     = { top: 16, right: 64, bottom: 48, left: MARGIN_LEFT };
+    const totalWidth = CHART_WIDTH + margin.left + margin.right;
+    // const barHeight  = 36;
+    const height     = CHART_HEIGHT;
+    const width      = CHART_WIDTH;
     const DURATION   = 500;
 
     const svgEl = d3.select(svgRef.current);
@@ -147,7 +175,7 @@ export default function VizTopInfluencers() {
         .attr("x", width / 2)
         .attr("y", height + 42)
         .attr("text-anchor", "middle")
-        .attr("font-size", "14px")
+        .attr("font-size", FONT_SIZE)
         .attr("fill", BROWN);
     }
 
@@ -173,7 +201,7 @@ export default function VizTopInfluencers() {
           .tickFormat(d3.format(",d")) as any
       )
       .call(g => {
-        g.selectAll("text").attr("fill", BROWN).attr("font-size", "14px");
+        g.selectAll("text").attr("fill", BROWN).attr("font-size", FONT_SIZE);
         g.selectAll("line, path").attr("stroke", BROWN);
       });
 
@@ -187,7 +215,7 @@ export default function VizTopInfluencers() {
         }) as any
       )
       .call(g => {
-        g.selectAll("text").attr("fill", BROWN).attr("font-size", "14px");
+        g.selectAll("text").attr("fill", BROWN).attr("font-size", FONT_SIZE);
         g.selectAll("line, path").attr("stroke", BROWN);
       });
 
@@ -230,7 +258,7 @@ export default function VizTopInfluencers() {
       .attr("y",                d => (y(d.member_id) ?? 0) + y.bandwidth() / 2)
       .attr("x",                d => x(d.score) + 6)
       .attr("dominant-baseline","middle")
-      .attr("font-size",        "14px")
+      .attr("font-size",        FONT_SIZE)
       .attr("fill",             BROWN)
       .attr("opacity",          0)
       .text(d => d.score.toLocaleString())
@@ -271,7 +299,7 @@ export default function VizTopInfluencers() {
       {/* Filters */}
       <div className='filter-container'>
         <div className='single-filter-container'>
-          <label>Chamber</label>
+          <label>Chamber:</label>
           <select value={chamber} onChange={e => setChamber(e.target.value as Chamber)}>
             <option value="">All</option>
             <option value="H">House</option>
@@ -279,7 +307,7 @@ export default function VizTopInfluencers() {
           </select>
         </div>
         <div className='single-filter-container'>
-          <label>Party</label>
+          <label>Party:</label>
           <select value={party} onChange={e => setParty(e.target.value as Party)}>
             <option value="">All</option>
             <option value="D">Democrat</option>
@@ -287,7 +315,7 @@ export default function VizTopInfluencers() {
           </select>
         </div>
         <div className='single-filter-container'>
-          <label>Policy Area</label>
+          <label>Policy Area:</label>
           <select value={policyArea} onChange={e => setPolicyArea(e.target.value)}>
             <option value="">All</option>
             {policyAreas.map(pa => (
@@ -300,7 +328,7 @@ export default function VizTopInfluencers() {
       {/* Legend */}
       <div className='legend'>
         {Object.entries(PARTY_COLORS).map(([p, color]) => (
-          <div key={p} style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "14px", color: "BROWN" }}>
+          <div key={p} style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: FONT_SIZE, color: "BROWN" }}>
             <div style={{ width: 12, height: 12, borderRadius: 2, background: color }} />
             {p === "D" ? "Democrat" : p === "R" ? "Republican" : "Independent"}
           </div>

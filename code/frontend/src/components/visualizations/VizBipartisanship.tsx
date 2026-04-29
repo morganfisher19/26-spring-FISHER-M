@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
 import "./VizAll.css";
+import { W, H, MARGIN, FONT_SIZE } from "./VizConfig";
 
 interface PartyTotal {
   party: string;
@@ -26,9 +27,6 @@ interface BarData {
 }
 
 const AGREEMENT_THRESHOLD = 0.5; // both parties > 50% yes = agreement
-const MARGIN = { top: 40, right: 40, bottom: 60, left: 80 };
-const WIDTH = 800 - MARGIN.left - MARGIN.right;
-const HEIGHT = 500 - MARGIN.top - MARGIN.bottom;
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -107,22 +105,22 @@ export default function VizBipartisanship() {
     // Initialize SVG structure if not already done
     if (svg.select("#chart-root").empty()) {
       svg
-        .attr("width",  WIDTH  + MARGIN.left + MARGIN.right)
-        .attr("height", HEIGHT + MARGIN.top  + MARGIN.bottom);
+        .attr("width",  W  + MARGIN.left + MARGIN.right)
+        .attr("height", H + MARGIN.top  + MARGIN.bottom);
 
       const g = svg.append("g")
         .attr("id", "chart-root")
         .attr("transform", `translate(${MARGIN.left},${MARGIN.top})`);
 
-      g.append("g").attr("id", "x-axis").attr("transform", `translate(0,${HEIGHT})`);
+      g.append("g").attr("id", "x-axis").attr("transform", `translate(0,${H})`);
       g.append("g").attr("id", "y-axis");
 
       g.append("text")
         .attr("transform", "rotate(-90)")
-        .attr("x", -HEIGHT / 2)
+        .attr("x", -H / 2)
         .attr("y", -50)
         .attr("text-anchor", "middle")
-        .style("font-size", "14px")
+        .style("font-size", FONT_SIZE)
         .style("font-weight", "bold")
         .style("fill", "#6B3A3A")
         .text("Number of Votes");
@@ -136,20 +134,23 @@ export default function VizBipartisanship() {
     // Scales
     const x = d3.scaleBand()
       .domain(data.map((d) => d.label))
-      .range([0, WIDTH])
+      .range([0, W])
       .padding(0.4);
 
     const y = d3.scaleLinear()
       .domain([0, Math.max(1, d3.max(data, (d) => d.count) ?? 0)])
       .nice()
-      .range([HEIGHT, 0]);
+      .range([H, 0]);
 
     // Axes
+    g.select<SVGTextElement>(".y-label")
+      .style("font-size", '14px');
+
     g.select<SVGGElement>("#x-axis")
       .transition(t)
       .call(d3.axisBottom(x))
       .selectAll("text")
-      .style("font-size", "14px")
+      .style("font-size", FONT_SIZE)
       .style("fill", "#6B3A3A")
       .style("font-weight", "normal");
     
@@ -165,7 +166,7 @@ export default function VizBipartisanship() {
           .tickFormat(d3.format("d"))  // integers only
       )
       .selectAll("text")
-      .style("font-size", "14px")
+      .style("font-size", FONT_SIZE)
       .style("fill", "#6B3A3A")
       .style("font-weight", "normal");
 
@@ -181,7 +182,7 @@ export default function VizBipartisanship() {
         (enter) =>
           enter.append("rect")
             .attr("x",      (d) => x(d.label) ?? 0)
-            .attr("y",      HEIGHT)
+            .attr("y",      H)
             .attr("width",  x.bandwidth())
             .attr("height", 0)
             .attr("fill",   (d) => d.color)
@@ -189,7 +190,7 @@ export default function VizBipartisanship() {
             .call((e) =>
               e.transition(t)
                 .attr("y",      (d) => y(d.count))
-                .attr("height", (d) => HEIGHT - y(d.count))
+                .attr("height", (d) => H - y(d.count))
             ),
         (update) =>
           update.call((u) =>
@@ -197,13 +198,13 @@ export default function VizBipartisanship() {
               .attr("x",      (d) => x(d.label) ?? 0)
               .attr("y",      (d) => y(d.count))
               .attr("width",  x.bandwidth())
-              .attr("height", (d) => HEIGHT - y(d.count))
+              .attr("height", (d) => H - y(d.count))
               .attr("fill",   (d) => d.color)
           ),
         (exit) =>
           exit.call((e) =>
             e.transition(t)
-              .attr("y",      HEIGHT)
+              .attr("y",      H)
               .attr("height", 0)
               .remove()
           )
@@ -217,9 +218,9 @@ export default function VizBipartisanship() {
         (enter) =>
           enter.append("text")
             .attr("x",            (d) => (x(d.label) ?? 0) + x.bandwidth() / 2)
-            .attr("y",            HEIGHT)
+            .attr("y",            H)
             .attr("text-anchor",  "middle")
-            .style("font-size",   "14px")
+            .style("font-size",   FONT_SIZE)
             .style("font-weight", "bold")
             .style("fill",        "#6B3A3A")
             .text((d) => `${d.count} (${total ? ((d.count / total) * 100).toFixed(1) : 0}%)`)
@@ -242,7 +243,7 @@ export default function VizBipartisanship() {
         (exit) =>
           exit.call((e) =>
             e.transition(t)
-              .attr("y", HEIGHT)
+              .attr("y", H)
               .style("opacity", 0)
               .remove()
           )

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
 import "./VizAll.css";
+import { W, H, MARGIN, FONT_SIZE } from "./VizConfig";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -113,9 +114,6 @@ function aggregate(
 }
 
 // ── D3 chart setup (runs once) ───────────────────────────────────────────────
-const MARGIN = { top: 20, right: 20, bottom: 80, left: 60 };
-const W = 700 - MARGIN.left - MARGIN.right;
-const H = 380 - MARGIN.top - MARGIN.bottom;
 const DURATION = 500;
 
 function initChart(svgEl: SVGSVGElement) {
@@ -149,7 +147,7 @@ function initChart(svgEl: SVGSVGElement) {
     .attr("x", -H / 2)
     .attr("y", -48)
     .attr("text-anchor", "middle")
-    .attr("font-size", "14px")
+    .attr("font-size", FONT_SIZE)
     .attr("font-weight", "bold")
     .attr("fill", "#6B3A3A")
     .text("Number of Votes");
@@ -207,11 +205,13 @@ function updateChart(
   const xFmt = gran === "month" ? d3.timeFormat("%b %Y") : d3.timeFormat("%b %d '%y");
 
   // For days, tick every 7 bars (weekly); for weeks every 4; months every 1
+  const skipEvery = W < 500 ? 3 : W < 700 ? 2 : 1;
+
   const tickData = gran === "month"
-  ? data
+  ? data.filter((_, i) => i % skipEvery === 0)
   : gran === "day"
-  ? data.filter((d) => d.period.getDate() === 1)
-  : data.filter((_, i) => i % 5 === 0);
+  ? data.filter((d) => d.period.getDate() === 1 && (skipEvery === 1 || d.period.getMonth() % skipEvery === 0))
+  : data.filter((_, i) => i % (5 * skipEvery) === 0);
 
   g.select<SVGGElement>(".x-axis")
     .call(
@@ -225,7 +225,7 @@ function updateChart(
     .selectAll("text")
     .attr("transform", "rotate(-35)")
     .style("text-anchor", "end")
-    .style("font-size", "14px")
+    .style("font-size", FONT_SIZE)
     .style("fill", "#6B3A3A");
 
   // Extend domain line to full width and apply axis colors
@@ -247,7 +247,7 @@ function updateChart(
 
   g.select<SVGGElement>(".y-axis")
     .selectAll("text")
-    .style("font-size", "14px")
+    .style("font-size", FONT_SIZE)
     .style("fill", "#6B3A3A");
 
   g.select<SVGGElement>(".y-axis")
