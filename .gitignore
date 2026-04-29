@@ -5,6 +5,16 @@
 *.sqlite
 *.db
 
+# Exceptions
+!package.json
+!package-lock.json
+!tsconfig.json
+!tsconfig.app.json
+!tsconfig.node.json
+
+!gold/
+
+
 # bootstrap & other vite installed packages
 node_modules/
 
