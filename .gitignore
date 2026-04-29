@@ -13,7 +13,8 @@
 !tsconfig.node.json
 !vercel.json
 
-!gold/
+!gold/*.json
+
 
 
 # bootstrap & other vite installed packages
