@@ -1,15 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
 import "./VizAll.css";
+import { W, H, MARGIN, FONT_SIZE } from "./VizConfig";
 
 interface Stage { label: string; count: number; }
 type FunnelData = Record<string, Stage[]>;
 
-const MARGIN = { top: 40, right: 40, bottom: 60, left: 80 };
-const W = 800 - MARGIN.left - MARGIN.right;
-const H = 500 - MARGIN.top - MARGIN.bottom;
-
 const API_URL = import.meta.env.VITE_API_URL;
+const margin = {
+  ...MARGIN,
+  bottom: W < 500 ? 150 : MARGIN.bottom,
+};
 
 export default function VizBillSurvival() {
   const svgRef    = useRef<SVGSVGElement>(null);
@@ -36,12 +37,12 @@ export default function VizBillSurvival() {
     if (!keys.length || !svgRef.current) return;
 
     const svg = d3.select(svgRef.current)
-      .attr("width",  W + MARGIN.left + MARGIN.right)
-      .attr("height", H + MARGIN.top  + MARGIN.bottom);
+      .attr("width",  W + margin.left + margin.right)
+      .attr("height", H + margin.top  + margin.bottom);
 
     const g = svg.append("g")
       .attr("class", "chart-root")
-      .attr("transform", `translate(${MARGIN.left},${MARGIN.top})`);
+      .attr("transform", `translate(${margin.left},${margin.top})`);
 
     // Static axes groups (content filled on each update)
     g.append("g").attr("class", "x-axis").attr("transform", `translate(0,${H})`);
@@ -51,7 +52,7 @@ export default function VizBillSurvival() {
       .attr("transform", "rotate(-90)")
       .attr("x", -H / 2).attr("y", -65)
       .attr("text-anchor", "middle")
-      .attr("font-size", "14px")
+      .attr("font-size", FONT_SIZE)
       .attr("font-weight", "bold")
       .attr("fill", "#6B3A3A")
       .text("Number of Bills");
@@ -85,8 +86,13 @@ export default function VizBillSurvival() {
       .transition().duration(400)
       .call(d3.axisBottom(x))
       .selectAll("text")
-      .attr("dy", "1.2em")
-      .style("font-size", "14px")
+
+      .attr("transform", W < 500 ? "rotate(-90)" : null)
+      .attr("x",         W < 500 ? -9            : null)
+      .attr("dy",        W < 500 ? "-0.4em"      : "1.2em")
+      .style("text-anchor", W < 500 ? "end"      : "middle")
+
+      .style("font-size", FONT_SIZE)
       .style("fill", "#6B3A3A");
     g.select<SVGGElement>(".x-axis")
       .selectAll("line, path")
@@ -96,7 +102,7 @@ export default function VizBillSurvival() {
       .transition().duration(400)
       .call(d3.axisLeft(y).ticks(6).tickFormat(d3.format(",d")))
       .selectAll("text")
-      .style("font-size", "14px")
+      .style("font-size", FONT_SIZE)
       .style("fill", "#6B3A3A");
     g.select<SVGGElement>(".y-axis")
       .selectAll("line, path")
@@ -128,7 +134,7 @@ export default function VizBillSurvival() {
       .join(
         (enter) => enter.append("text").attr("class", "bar-label")
           .attr("text-anchor", "middle")
-          .attr("font-size", "14px").attr("fill", "#6B3A3A")
+          .attr("font-size", FONT_SIZE).attr("fill", "#6B3A3A")
           .attr("x", (d) => (x(d.label) ?? 0) + x.bandwidth() / 2)
           .attr("y", H - 6).text("0"),
         (update) => update,
