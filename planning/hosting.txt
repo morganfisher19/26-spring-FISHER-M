@@ -1,11 +1,10 @@
 Frontend:
-
 - Host on Vercel
 
 
 Backend + Database:
 
-- Single Amazon EC2 instance (OR DigitalOcean)
+- DigitalOcean Droplet
 - Use Docker Compose:
     - Flask API container
     - PostgreSQL container
@@ -13,5 +12,4 @@ Backend + Database:
 
 Pipeline:
 - Run your Python pipeline:
-    - Locally → connect to EC2 DB
-    - OR schedule via cron inside EC2
+    - Locally → connect to DB

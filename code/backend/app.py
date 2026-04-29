@@ -7,7 +7,7 @@ import os
 
 
 # CONNECT TO DATABASE
-DB_PASSWORD = 'data4001'
+DB_PASSWORD = os.environ.get('DB_PASSWORD')
 
 app = Flask(__name__)
 CORS(app)
