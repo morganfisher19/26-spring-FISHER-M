@@ -35,7 +35,7 @@ export default function MemberSelect() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/members")
+    fetch("/api/members")
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP error: ${res.status}`);
         return res.json();

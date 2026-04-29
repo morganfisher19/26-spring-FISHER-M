@@ -2,9 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
 import "./VizAll.css";
 
-
-const API_BASE = "http://localhost:5000";
-
 interface Stage { label: string; count: number; }
 type FunnelData = Record<string, Stage[]>;
 
@@ -22,7 +19,7 @@ export default function VizBillSurvival() {
 
   // ── 1. Fetch everything ONCE ──────────────────────────────────
   useEffect(() => {
-    fetch(`${API_BASE}/api/visualizations/bill_funnel`)
+    fetch(`/api/visualizations/bill_funnel`)
       .then((r) => r.json())
       .then((json: FunnelData) => {
         allData.current = json;

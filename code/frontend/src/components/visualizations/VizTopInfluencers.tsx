@@ -65,8 +65,8 @@ export default function VizTopInfluencers() {
   // Fetch all data once
   useEffect(() => {
     Promise.all([
-      fetch(`${API_BASE}/api/visualizations/top_influencers`).then(r => r.json()),
-      fetch(`${API_BASE}/api/policy_areas`).then(r => r.json()),
+      fetch(`/api/visualizations/top_influencers`).then(r => r.json()),
+      fetch(`/api/policy_areas`).then(r => r.json()),
     ])
       .then(([rows, areas]: [RawRow[], string[]]) => {
         setRaw(rows);

@@ -102,8 +102,8 @@ export default function MemberVotes() {
     setActiveTab("votes");
 
     Promise.all([
-      fetch(`${API_BASE}/api/member/${memberId}`).then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); }),
-      fetch(`${API_BASE}/api/member/${memberId}/sponsorships`).then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); }),
+      fetch(`/api/member/${memberId}`).then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); }),
+      fetch(`/api/member/${memberId}/sponsorships`).then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); }),
     ])
       .then(([memberData, sponsorshipData]: [MemberDetail, Sponsorship[]]) => {
         memberData.vote_records.sort(

@@ -35,15 +35,8 @@ CONGRESS = 119
 CURRENT_YEAR = 2026
 
 # --- Database ---
-DB_HOST = "localhost"
+DB_HOST = os.getenv("SERVER")
 DB_PORT = 5432
 DB_NAME = "congress_db"
 DB_USER = "postgres"
 DB_PASSWORD = os.getenv("DB_PASSWORD")
-
-
-# Known record counts (update these when re-running to get latest data)
-MEMBER_COUNT = 538
-BILL_COUNT = 13250
-AMENDMENT_COUNT = 4455
-HOUSE_VOTE_COUNTS = {1: 362, 2: 78}  # session: count

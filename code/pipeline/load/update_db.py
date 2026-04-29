@@ -178,7 +178,6 @@ def upsert_bill_sponsorships(cur):
 
 def upsert_laws(cur):
 
-    #TODO: Add better unique key for laws to prevent duplicates
 
     laws = load_gold("laws_119.json")
     bills = load_gold("bills_119.json")
@@ -198,8 +197,7 @@ def upsert_laws(cur):
         parse_law_date(law.get("law_date")),
         law.get("congress"),
         law.get("chamber")
-    ) for law in laws
-        if law.get("bill_id") in valid_bill_ids]
+    ) for law in seen.values()]
 
     execute_values(cur, """
         INSERT INTO laws (law_num, law_type, bill_id, law_date, congress, chamber)

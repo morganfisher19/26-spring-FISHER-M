@@ -7,11 +7,11 @@ import os
 
 
 # CONNECT TO DATABASE
-DB_PASSWORD = os.getenv("DB_PASSWORD")
+DB_PASSWORD = 'data4001'
 
 app = Flask(__name__)
 CORS(app)
-app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://postgres:{DB_PASSWORD}@localhost/congress_db'
+app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://postgres:{DB_PASSWORD}@postgres-db/congress_db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
@@ -409,7 +409,5 @@ def get_policy_areas():
     )
     return jsonify([r.policy_area for r in rows])
 
-if __name__ == '__main__':
-    # Note: debug = False in production
-    app.run(debug = True)
-    # app.run(host = '0.0.0.0', port = 8000, debug = True)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)
