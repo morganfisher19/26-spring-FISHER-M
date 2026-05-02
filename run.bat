@@ -9,9 +9,9 @@ if %errorlevel% neq 0 (
 )
 echo Pipeline complete.
 
-:: Start backend in a new window
-start /b python code/backend/app.py
+@REM :: Start backend in a new window
+@REM start /b python code/backend/app.py
 
-:: Start frontend
-cd code/frontend
-npm run dev
+@REM :: Start frontend
+@REM cd code/frontend
+@REM npm run dev

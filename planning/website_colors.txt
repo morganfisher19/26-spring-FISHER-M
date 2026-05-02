@@ -1,0 +1,18 @@
+website colors
+
+dark pink:
+#E6677F
+
+light pink:
+#FFB3C1
+
+darker pink:
+#CC4A63
+
+white
+
+brown:
+#6B3A3A
+
+green:
+#A8C3A0
