@@ -1,55 +1,69 @@
-Voting data
+Resources used to create project:
+
+Coding:
+- VSCode
+
+
+
+AI:
+- Chat GPT (free version)
+- Claude (free version)
+
+
+
+Data:
+- Voting data:
     House voting data - individual votes: 
         Website: https://clerk.house.gov/Votes
         XML data: https://clerk.house.gov/evs/{YEAR}/roll{XXX}.xml
-    
     House voting data - roll call:
         Website: https://api.congress.gov/
-        API Search 1: https://api.congress.gov/v3/house-vote/119?format=json&offset=0&api_key=
-        API Search 2: https://api.congress.gov/v3/house-vote/119?format=json&offset=0&api_key=
-
+        API: https://api.congress.gov/v3/house-vote/119?format=json&offset=0&api_key=
     Senate voting data - individual votes:
         Website: https://www.senate.gov/legislative/votes_new.htm
         XML data: https://www.senate.gov/legislative/LIS/roll_call_votes/vote{CONGRESS}{SESSION}/vote_{CONGRESS}_{SESSION}_{XXXXX}.xml
-
     Senate voting data - roll call:
         Website: https://www.senate.gov/legislative/votes_new.htm
         XML data: https://www.senate.gov/legislative/LIS/roll_call_lists/vote_menu_119_{SESSION}.xml
-
-Member data
+- Member data
     Member data:
         Website: https://api.congress.gov/
-        API Search: https://api.congress.gov/v3/member/congress/119?format=json&currentMember=true&api_key=
-
+        API: https://api.congress.gov/v3/member/congress/119?format=json&currentMember=true&api_key=
     Member birth year data:
         Website: https://bioguide.congress.gov/search?index=%22bioguideprofiles%22&size=96&matches=[]&filters={%22jobPositions.congressAffiliation.congress.name%22:[%22The%20119th%20United%20States%20Congress%22]}&sort=[{%22_score%22:true},{%22field%22:%22unaccentedFamilyName%22,%22order%22:%22asc%22},{%22field%22:%22unaccentedGivenName%22,%22order%22:%22asc%22},{%22field%22:%22unaccentedMiddleName%22,%22order%22:%22asc%22}]&view=%22Table%22
         *Downloaded csv locally
-
     Member bioguides:
         Website: https://bioguide.congress.gov
         Page link:https://bioguide.congress.gov/search/bio/{BIO_ID}
-
-    Member religious affiliation:
-        Website: https://www.pewresearch.org/religion/2025/01/02/faith-on-the-hill-2025/
-        pdf link: https://www.pewresearch.org/wp-content/uploads/sites/20/2024/12/pr_2025-01-02_faith-on-the-hill_member-list.pdf
-
-    *Unable to find data on member gender & race
-
-Bill data
+- Bill data
     Laws data:
         Website: https://api.congress.gov/
-        API Search: https://api.congress.gov/v3/law/119?format=json&api_key=
-
+        API: https://api.congress.gov/v3/law/119?format=json&api_key=
     Bill data:
         Website: https://api.congress.gov/
         API Search: https://api.congress.gov/v3/bill/119/hr?format=json&offset=0&api_key=
         ^ bill type want to include hr, s, hjres, & sjres
         ^ many data points (~8000 alone for those with type hr)
-
     Amendment data:
         Website: https://api.congress.gov/
         API Search: https://api.congress.gov/v3/amendment/119?format=json&offset=0&api_key=
         ^ with around 5000 data points for 119th congress
+- State reference data:
+    https://github.com/jasonong/List-of-US-States/blob/master/states.csv
 
-State reference data:
-https://github.com/jasonong/List-of-US-States/blob/master/states.csv
+
+
+Hosting:
+- DigitalOcean
+- Vercel
+- Docker
+
+
+
+Learning resources:
+- YouTube
+    Learn PostgreSQL Tutorial - Full Course for Beginners: https://www.youtube.com/watch?v=qw--VYLpxG4
+    Build your first REST API with Flask and PostgreSQL: https://www.youtube.com/watch?v=DlNIXC9SaF4
+    React Tutorial for Beginners: https://www.youtube.com/watch?v=SqcY0GlETPk&t=163s
+    Docker Tutorial for Beginners: https://www.youtube.com/watch?v=pTFZFxd4hOI
+    Let's learn D3.js - D3 for data visualization (full course): https://www.youtube.com/watch?v=C4t6qfHZ6Tw
