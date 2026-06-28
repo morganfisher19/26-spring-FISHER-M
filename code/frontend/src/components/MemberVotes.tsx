@@ -57,13 +57,14 @@ function formatDisplayName(fullName: string): string {
 
 function buildCongressUrl(billType: string | null, billNum: number | null): string | null {
   if (!billType || !billNum) return null;
-  const slug = BILL_TYPE_MAP[billType];
+  const slug = BILL_TYPE_MAP[billType.toUpperCase()];
   if (!slug) return null;
   return `https://www.congress.gov/bill/119th-congress/${slug}/${billNum}`;
 }
 
 function BillLink({ title, billType, billNum }: { title: string | null; billType: string | null; billNum: number | null }) {
   const url = buildCongressUrl(billType, billNum);
+  console.log({ title, billType, billNum, url });
   if (!title) return <span>—</span>;
   return url
     ? <a className="billLink" href={url} target="_blank" rel="noopener noreferrer">{title}</a>
