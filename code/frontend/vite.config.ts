@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      '/api': 'http://68.183.104.231:5000'
+      '/api': 'https://api.mf-member-monitor.com'
     }
   }
 })
