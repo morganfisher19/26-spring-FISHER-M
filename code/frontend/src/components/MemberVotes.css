@@ -171,6 +171,8 @@ td:first-child, td:last-child {
 
 .billLink:hover {
   color: pink;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 /* Sponsored / cosponsored list */
