@@ -49,8 +49,8 @@ https://bioguide.congress.gov/search?index=%22bioguideprofiles%22&size=96&matche
 
 And put json file in this path: data/references/raw_member_bios_119.json
 '''
-# fetch_member_bios()
-# fetch_member_images()
+fetch_member_bios()
+fetch_member_images()
 
 # --- Transform ---
 from pipeline.transform.clean_members import clean_members
