@@ -4,16 +4,17 @@ from flask_cors import CORS
 from sqlalchemy.orm import joinedload, contains_eager
 from sqlalchemy import or_, and_, not_, func, distinct
 import os
-
-
-# CONNECT TO DATABASE
-DB_PASSWORD = os.environ.get('DB_PASSWORD')
+from config import CONFIG_MAP, ACTIVE_ENV
 
 app = Flask(__name__)
+app.config.from_object(CONFIG_MAP[ACTIVE_ENV])
 CORS(app)
-app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://postgres:{DB_PASSWORD}@postgres-db/congress_db'
+app.config['SQLALCHEMY_DATABASE_URI'] = app.config["DB_URL"]
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
+
+# Startup log
+print(f"Environment: {ACTIVE_ENV}")
 
 # MODELS
 class MemberModel(db.Model):

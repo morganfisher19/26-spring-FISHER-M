@@ -48,9 +48,11 @@ But first download new json file from link:
 https://bioguide.congress.gov/search?index=%22bioguideprofiles%22&size=96&matches=[]&filters=%7B%22jobPositions.congressAffiliation.congress.name%22:[%22The%20119th%20United%20States%20Congress%22]%7D&sort=[%7B%22_score%22:true%7D,%7B%22field%22:%22unaccentedFamilyName%22,%22order%22:%22asc%22%7D,%7B%22field%22:%22unaccentedGivenName%22,%22order%22:%22asc%22%7D,%7B%22field%22:%22unaccentedMiddleName%22,%22order%22:%22asc%22%7D]&view=%22Table%22
 
 And put json file in this path: data/references/raw_member_bios_119.json
+
+Then uncomment code and run with the rest of script
 '''
-fetch_member_bios()
-fetch_member_images()
+# fetch_member_bios()
+# fetch_member_images()
 
 # --- Transform ---
 from pipeline.transform.clean_members import clean_members

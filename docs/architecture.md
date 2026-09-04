@@ -56,8 +56,8 @@ https://www.mf-member-monitor.com https://api.mf-member-monitor.com
 - **Served over:** HTTPS
 - **API base URL used by frontend:** `https://api.mf-member-monitor.com`
 
-The frontend **never** talks to the droplet's raw IP address — all requests 
-go through the `api.mf-member-monitor.com` domain, which Nginx handles.
+All frontend requests go through the `api.mf-member-monitor.com` domain, 
+which Nginx handles.
 
 
 ## 4. Backend
@@ -145,33 +145,152 @@ Flask connects to Postgres using the hostname `postgres-db`, not an IP.
 ## 8. ETL Pipeline — ⚠️ Currently Broken
 
 - **Trigger:** Manual (no scheduler/cron currently)
-- **Status:** Broken since Nginx was introduced / reconfigured
+- **Status:** Broken since Nginx was introduced
 - **Symptom:** Data is not being written into the database with the current 
   configuration
 
-### Likely cause
-Before Nginx and Docker networking were set up, the ETL script probably 
-connected to Postgres via `localhost` or a public/direct IP + exposed port. 
-Now that Postgres:
-- runs in its own container, and
-- is only reachable via the internal `app-network` using the hostname 
-  `postgres-db`,
+### Cause
+Originally, the PostgreSQL container was publicly exposed:
+68.183.104.231:5432
+        ↓
+    PostgreSQL
 
-...the ETL script needs to either:
-1. **Run inside the same Docker network** (e.g., as another container attached 
-   to `app-network`, or a one-off container run with `--network app-network`), 
-   so it can resolve `postgres-db`, **or**
-2. If it runs from outside Docker (e.g., directly on the droplet or from 
-   your laptop), it needs a connection string using an address Postgres 
-   actually exposes — which currently doesn't exist, since the DB isn't 
-   published anywhere. You'd need to either expose a port for it (not 
-   recommended for security) or run the ETL as a container on `app-network`.
+Your local pipeline therefore used:
+DB_HOST = 68.183.104.231
+DB_PORT = 5432
 
-**Fill in / to investigate:**
-- Where does the ETL currently run from? `[FILL IN — laptop / droplet / other]`
-- What connection string/host does it currently use? `[FILL IN]`
-- ETL script location: `[FILL IN]`
-- Source(s) of data being extracted: `[FILL IN]`
+Then we changed your Docker setup to stop exposing PostgreSQL publicly. Your current Docker setup showed:
+postgres-db
+PORTS: 5432/tcp
+
+rather than:
+0.0.0.0:5432->5432/tcp
+
+At the same time, we put flask-app and postgres-db on the Docker network app-network, allowing Flask to connect to PostgreSQL using:
+
+postgres-db:5432
+
+That's why your Flask application started working again.
+
+Your current architecture is therefore:
+
+                        INTERNET
+                           │
+                           ▼
+                    Vercel frontend
+                           │
+                           ▼
+              api.mf-member-monitor.com
+                           │
+                           ▼
+                         Nginx
+                           │
+                           ▼
+                    127.0.0.1:5000
+                           │
+                           ▼
+                    Flask/Gunicorn
+                           │
+                           ▼
+                    Docker network
+                     app-network
+                           │
+                           ▼
+                    postgres-db:5432
+
+There is no longer a path from the Internet to PostgreSQL at 68.183.104.231:5432.
+
+That's exactly is why your local pipeline gets:
+
+connection to server at "68.183.104.231", port 5432 failed: Connection refused
+
+Your get_connection() function is:
+
+def get_connection():
+    return psycopg2.connect(
+        dbname=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        host=DB_HOST,
+        port=DB_PORT
+    )
+
+And your configuration is:
+
+DB_HOST = os.getenv("SERVER")
+DB_PORT = 5432
+
+So when you run the pipeline on your Windows computer, it effectively says:
+
+Connect to:
+
+68.183.104.231
+port 5432
+
+But we deliberately closed that route.
+
+Therefore:
+
+Windows pipeline
+       │
+       │ 68.183.104.231:5432
+       ▼
+DigitalOcean
+       ✕
+PostgreSQL isn't publicly exposed
+
+The pipeline never gets as far as executing upsert_members(), upsert_bills(), etc. It fails at:
+
+conn = get_connection()
+
+which is exactly what your traceback shows.
+
+### Quick Fix Solution
+
+There are now two different ways to connect to your database, depending on where the code is running.
+
+Flask running on DigitalOcean
+
+Flask is inside Docker, so it should use:
+
+postgres-db:5432
+
+because postgres-db is the Docker DNS name on app-network.
+
+Pipeline running on your Windows computer
+
+Your computer is outside Docker and outside the droplet, so it cannot use:
+
+postgres-db
+
+and it also cannot currently use:
+
+68.183.104.231:5432
+
+because we closed public PostgreSQL access.
+
+So how do we fix the pipeline?
+
+Since you said you ultimately want the pipeline to run automatically on the droplet, I would not undo the security change.
+
+For the temporary period where you still run the pipeline from Windows, the cleanest solution is an SSH tunnel.
+
+It gives your laptop a temporary, encrypted path into the private PostgreSQL database:
+
+Your Windows computer
+        │
+        │ localhost:5432
+        ▼
+    SSH tunnel
+        │
+        │ encrypted SSH connection
+        ▼
+DigitalOcean Droplet
+        │
+        ▼
+PostgreSQL
+
+Your database remains private.
 
 ---
 
@@ -200,7 +319,22 @@ Password: `[FILL IN — store in password manager, not this file]`
 
 ---
 
-## 10. Open Items / TODO
+## 10. Config files
+Environment files store variables that should be hidden from git and users. Separated into development and production environments
+
+.env files:
+- .env.dev (local development)
+- .env.prod (production development)
+
+Config files extract hidden environment variables in a centralized location so rest of code base can aceess that information.
+
+config files:
+- pipeline/config.py
+- backend/config.py
+- frontend/vite.config.ts
+
+
+## 11. Open Items / TODO
 
 - [ ] Fix ETL → database connection (Section 8)
 - [ ] Add automated scheduling for ETL (cron / systemd timer / Airflow, etc.)

@@ -1,17 +1,18 @@
 @echo off
 
 :: Run pipeline first
-echo Running pipeline...
-python code/pipeline/run_pipeline.py
-if %errorlevel% neq 0 (
-    echo Pipeline failed. Exiting.
-    exit /b 1
-)
-echo Pipeline complete.
+@REM echo Running pipeline...
+@REM python code/pipeline/run_pipeline.py
+@REM if %errorlevel% neq 0 (
+@REM     echo Pipeline failed. Exiting.
+@REM     exit /b 1
+@REM )
+@REM echo Pipeline complete.
 
-@REM :: Start backend in a new window
-@REM start /b python code/backend/app.py
+:: Start backend in a new window
+set ENVIRONMENT=dev
+start /b python code/backend/app.py
 
-@REM :: Start frontend
-@REM cd code/frontend
-@REM npm run dev
+:: Start frontend
+cd code/frontend
+npm run dev
